@@ -1,53 +1,56 @@
 lexer grammar TypeScriptLexer;
 //TYPES
-// Keywords for variable types
-TYPE_INT: 'number';      // TypeScript uses 'number' for integers and floats
-TYPE_STRING: 'string';
-TYPE_BOOLEAN: 'boolean';
-TYPE_ARRAY: 'Array';
-
-TYPE_ANY: 'any';
-TYPE_LIST: 'list';
-
-
+TYPES:
+      'number'
+    | 'string'
+    | 'boolean'
+    | 'Array'
+    | 'any'
+    | 'list'
+    ;
 
 //KEYWORDS
-KEYWORD_FUNCTION: 'function';
-KEYWORD_VOID:'void';
-KEYWORD_LET: 'let';
-KEYWORD_CONST: 'const';
-KEYWORD_IF: 'if';
-KEYWORD_ELSE: 'else';
-KEYWORD_RETURN: 'return';
-KEYWORD_IMPORT:'import';
-//KEYWORD_IMPORTS:'imports';
-KEYWORD_EXPORT:'export';
-KEYWORD_FROM:'from';
-KEYWORD_AS: 'as';
-KEYWORD_ENUM:'enum';
-KEYWORD_CLASS:'class';
-KEYWORD_EXTENDS:'extends';
-KEYWORD_INTERFACE:'interface';
-KEYWORD_CONSTRUCTOR:'constructor';
-KEYWORD_THIS:'this';
-KEYWORD_FOR:'for';
-KEYWORD_WHILE:'while';
-KEYWORD_PRIVATE:'private';
-KEYWORD_PUBLIC:'public';
-KEYWORD_PROTECTED:'protected';
-AT: '@';
-KEYWORD_COMPONENT: 'Component';
-KEYWORD_NGMODULE:'NgModule';
-KEYWORD_IMPLEMENTS:'implements';
+KEYWORDS:
+      'function'
+    | 'void'
+    | 'let'
+    | 'const'
+    | 'if'
+    | 'else'
+    | 'return'
+    | 'import'
+    | 'export'
+    | 'from'
+    | 'as'
+    | 'enum'
+    | 'class'
+    | 'extends'
+    | 'interface'
+    | 'constructor'
+    | 'this'
+    | 'for'
+    | 'while'
+    | 'private'
+    | 'public'
+    | 'protected'
+    | 'Component'
+    | 'NgModule'
+    | 'implements'
+    | '@'
+    ;
+
+
 
 
 
 //Identifiers
-//CUSTOM_TAG: [a-zA-Z][a-zA-Z0-9-]*;
+//IDENTIFIER:
+//    ([a-zA-Z_\\u0600-\\u06FF][a-zA-Z0-9_\\u0600-\\u06FF-]*)
+//    | ([a-zA-Z\\u0600-\\u06FF][a-zA-Z0-9_\\u0600-\\u06FF-]*);
 
-IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]* | [a-zA-Z][a-zA-Z0-9-]*;
-//IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_] '-' * '_'* ([a-zA-Z_][a-zA-Z0-9_] '-' * '_'*)*;
+IDENTIFIER: ([a-zA-Z_][a-zA-Z0-9_]* | [a-zA-Z][a-zA-Z0-9-]*)  ;
 NUMBER:[0-9]+ ('.' [0-9]+)?;
+//ARABIC:(~["\r\n])* ;
 STRING: '"' (~["\r\n])* '"' | '\'' (~['\r\n])* '\'';
 BOOLEAN: 'true' | 'false';
 

@@ -1,5 +1,5 @@
 // Generated from C:/Users/USER/IdeaProjects/angularproject/src/antlr/TypeScriptLexer.g4 by ANTLR 4.13.2
-package gen;
+package antlr;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;

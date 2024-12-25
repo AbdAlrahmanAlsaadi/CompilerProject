@@ -8,9 +8,7 @@ program: statement*;
 
 // Statement rules
 statement:
-//      commentStatment
-//    |
-     functionDeclaration
+     decorator
     | ifStatement
     | expression
     | enumLiteral
@@ -18,8 +16,10 @@ statement:
     | directiveElement
     | importStatement
     | exportStatement
-    |decorator
+    |functionDeclaration
     | classDeclaration
+    | variableDeclaration
+
     ;
 
 
@@ -36,26 +36,22 @@ operator:
 
 // Type definitions
 type:
-      TYPE_INT
-    | TYPE_STRING
-    | TYPE_BOOLEAN
-    | TYPE_ARRAY
-    | TYPE_ANY
-    | TYPE_LIST
+      TYPES
     | type LSQUARE RSQUARE                  //`number[]`
-    | TYPE_ARRAY LESS type BIGGER           //`Array<number>`
+    | TYPES LESS type BIGGER           //`Array<number>`
     | LSQUARE type (COMMA type)* RSQUARE    //`[string, number]`
 
     ;
 
 accessMoidifers:
-    KEYWORD_PUBLIC|KEYWORD_PRIVATE|KEYWORD_PROTECTED
+    KEYWORDS
 ;
 
 
-commentStatment: COMMENT IDENTIFIER ;
+
 
 directiveElement:
+    TAG_OPEN directive*  BIGGER|
     TAG_OPEN directive*  BIGGER (TAG_OPEN directive*  BIGGER )* (htmlContent | templateBinding | directiveElement)* DOT? (TAG_CLOSE)* TAG_CLOSE ;
 
 //directiveElement:
@@ -66,7 +62,7 @@ directive:
 
 
 htmlContent:
-    IDENTIFIER (IDENTIFIER)*;
+    (IDENTIFIER) (IDENTIFIER)* COLON?;
 
 
 
@@ -78,31 +74,49 @@ tupleLiteral:
     ;
 
 enumLiteral:
-    KEYWORD_ENUM IDENTIFIER LBRACE IDENTIFIER (COMMA IDENTIFIER (ASSIGN expression)? )* RBRACE //(ASSIGN expression)? Enum members can optionally have assigned values
+    KEYWORDS IDENTIFIER LBRACE IDENTIFIER (COMMA IDENTIFIER (ASSIGN expression)? )* RBRACE //(ASSIGN expression)? Enum members can optionally have assigned values
 ;
 
 
 enumAccess:
-    KEYWORD_LET IDENTIFIER COLON IDENTIFIER ASSIGN IDENTIFIER DOT IDENTIFIER  // Accessing an enum member, e.g., Status.Active
+    KEYWORDS IDENTIFIER COLON IDENTIFIER ASSIGN IDENTIFIER DOT IDENTIFIER  // Accessing an enum member, e.g., Status.Active
     ;
 
 
 variableDeclaration:
-      accessMoidifers? (KEYWORD_LET | KEYWORD_CONST) IDENTIFIER COLON type (ASSIGN (expression | tupleLiteral))? SEMICOLON
+      accessMoidifers? (KEYWORDS) IDENTIFIER COLON type (ASSIGN (expression | tupleLiteral))? SEMICOLON
     | accessMoidifers? IDENTIFIER COLON type SEMICOLON
     | accessMoidifers? IDENTIFIER COLON type ASSIGN (expression | tupleLiteral) SEMICOLON
+    | KEYWORDS IDENTIFIER COLON ASSIGN expression SEMICOLON
+    |  expression operator expression* SEMICOLON
+
 //    | IDENTIFIER COLON STRING
     ;
 arrayLiteral:
-    LSQUARE (expression (COMMA expression)*)? RSQUARE
+    LSQUARE (expression (COMMA expression)*)? RSQUARE SEMICOLON?
+    |
+     LSQUARE objectLiteral (COMMA  objectLiteral)* COMMA? RSQUARE SEMICOLON?
     ;
+
+objectLiteral:
+    LBRACE propertyAssignment (COMMA propertyAssignment)* RBRACE
+    ;
+
+
+propertyAssignment:
+    IDENTIFIER COLON expression
+    ;
+
 
 functionDeclaration:
-        accessMoidifers? KEYWORD_FUNCTION IDENTIFIER OPENB (parameter (COMMA parameter)*)? CLOSEB COLON (type|KEYWORD_VOID) block
-    |   accessMoidifers? KEYWORD_LET IDENTIFIER ASSIGN KEYWORD_FUNCTION  OPENB (IDENTIFIER (COMMA IDENTIFIER)*)? CLOSEB COLON (type|KEYWORD_VOID) LBRACE statement* RBRACE SEMICOLON
+        accessMoidifers? KEYWORDS IDENTIFIER OPENB (parameter (COMMA parameter)*)? CLOSEB COLON? (type|KEYWORDS)? block
+    |   accessMoidifers? KEYWORDS IDENTIFIER ASSIGN KEYWORDS  OPENB (IDENTIFIER (COMMA IDENTIFIER)*)? CLOSEB COLON (type|KEYWORDS) LBRACE statement* RBRACE SEMICOLON
 
     ;
+returnStatment:
+    KEYWORDS expression SEMICOLON
 
+;
 parameter:
     IDENTIFIER COLON type;
 
@@ -116,7 +130,7 @@ block:
 
 
 ifStatement:
-    KEYWORD_IF OPENB expression CLOSEB block (KEYWORD_ELSE block)?;
+    KEYWORDS OPENB expression CLOSEB block (KEYWORDS block)?;
 
 //classDeclaration:
 //    KEYWORD_EXPORT KEYWORD_CLASS IDENTIFIER (KEYWORD_EXTENDS IDENTIFIER)? LBRACE classBody RBRACE;
@@ -125,64 +139,65 @@ ifStatement:
 //    (variableDeclaration | functionDeclaration | constructorDeclaration)*;
 
 constructorDeclaration:
-    KEYWORD_CONSTRUCTOR OPENB (parameterList)? (COMMA parameterList)* CLOSEB LBRACE (thisAssignment)* RBRACE
+    (KEYWORDS|IDENTIFIER) OPENB (parameterList)? (COMMA parameterList)* CLOSEB LBRACE (thisAssignment|statement)* RBRACE
 ;
 parameterList:
-    IDENTIFIER COLON type
+    accessMoidifers? IDENTIFIER COLON (type|IDENTIFIER)
 ;
 thisAssignment:
-    KEYWORD_THIS DOT IDENTIFIER ASSIGN IDENTIFIER SEMICOLON
+    KEYWORDS DOT IDENTIFIER ASSIGN IDENTIFIER SEMICOLON|
+    (IDENTIFIER|KEYWORDS) operator (IDENTIFIER|KEYWORDS) ASSIGN (IDENTIFIER|KEYWORDS) operator (IDENTIFIER|KEYWORDS) (DOT (IDENTIFIER|KEYWORDS) )* OPENB? CLOSEB? SEMICOLON
 ;
 
 interfaceDeclaration:
-    KEYWORD_EXPORT KEYWORD_INTERFACE IDENTIFIER LBRACE interfaceBody RBRACE;
+    KEYWORDS KEYWORDS IDENTIFIER LBRACE interfaceBody RBRACE;
 
 interfaceBody:
     (IDENTIFIER COLON type SEMICOLON)*;
 
 forloop:
-    KEYWORD_FOR OPENB forBrack CLOSEB block
+    KEYWORDS OPENB forBrack CLOSEB block
 ;
 
 forBrack:
-(KEYWORD_LET IDENTIFIER ASSIGN NUMBER SEMICOLON IDENTIFIER (LESS (ASSIGN)?|BIGGER (ASSIGN)?) NUMBER SEMICOLON statement)
+(KEYWORDS IDENTIFIER ASSIGN NUMBER SEMICOLON IDENTIFIER (LESS (ASSIGN)?|BIGGER (ASSIGN)?) NUMBER SEMICOLON statement)
 ;
 
 whileloop:
-    KEYWORD_WHILE OPENB expression CLOSEB block
+    KEYWORDS OPENB expression CLOSEB block
 ;
 //modulesImportExport:
 //KEYWORD_IMPORT
 //;
 
-importStatement: KEYWORD_IMPORT importClause (KEYWORD_FROM STRING)? SEMICOLON ;
+importStatement: KEYWORDS importClause (KEYWORDS STRING)? SEMICOLON ;
 importClause: (IDENTIFIER | LBRACE importSpecifier (COMMA importSpecifier)* RBRACE) ;
-importSpecifier: IDENTIFIER (KEYWORD_AS IDENTIFIER)? ;
-exportStatement: KEYWORD_EXPORT (KEYWORD_DEFAULT? expression | LBRACE exportSpecifier (COMMA exportSpecifier)* RBRACE) SEMICOLON ;
-exportSpecifier: IDENTIFIER (KEYWORD_AS IDENTIFIER)? ;
+importSpecifier: IDENTIFIER|KEYWORDS (KEYWORDS (IDENTIFIER|KEYWORDS))? ;
+exportStatement: KEYWORDS (KEYWORDS? expression | LBRACE exportSpecifier (COMMA exportSpecifier)* RBRACE) SEMICOLON ;
+exportSpecifier: IDENTIFIER (KEYWORDS IDENTIFIER)? ;
 
-decorator: AT (KEYWORD_COMPONENT|KEYWORD_NGMODULE) OPENB decoratorBody CLOSEB ;
+decorator: KEYWORDS (KEYWORDS|IDENTIFIER) OPENB decoratorBody CLOSEB ;
 decoratorBody: LBRACE decoratorProperty (COMMA decoratorProperty)* RBRACE ;
 
 decoratorProperty: IDENTIFIER COLON LSQUARE? (STRING|IDENTIFIER|NUMBER)(COMMA IDENTIFIER)* RSQUARE?  ;
 
-classDeclaration: decorator* KEYWORD_EXPORT? KEYWORD_CLASS IDENTIFIER ((KEYWORD_EXTENDS|KEYWORD_IMPLEMENTS) IDENTIFIER)? LBRACE classBody RBRACE ;
-classBody: (variableDeclaration | functionDeclaration | constructorDeclaration)* ;
+classDeclaration: decorator* KEYWORDS? KEYWORDS IDENTIFIER ((KEYWORDS|KEYWORDS) IDENTIFIER)? LBRACE classBody RBRACE ;
+classBody: (variableDeclaration | functionDeclaration | constructorDeclaration|expression)* ;
 
 // Expression definitions
 expression:
       IDENTIFIER     #anything
-    | NUMBER         #numberExpression
+    |NUMBER         #numberExpression
     | STRING        #stringExpression
     | BOOLEAN       #booleanExpression
-    |variableDeclaration #variableDeclar
-    |arrayLiteral #arrayDec
-    | expression operator expression ((OR|AND|SHEE)* expression operator expression)* #compristion
+//    |variableDeclaration #variableDeclar
+    | arrayLiteral #arrayDec
+    | expression operator expression ((OR|AND|SHEE)* expression operator expression)*  #compristion
     | expression (OR|AND|SHEE)* expression (expression (OR|AND|SHEE)* expression)* #cpop
     | enumAccess #enumAc
 //    |classDeclaration #class
     |interfaceDeclaration #interface
     |(forloop|whileloop) #for
-    |commentStatment #comment
+
 
     ;
