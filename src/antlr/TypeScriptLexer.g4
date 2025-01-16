@@ -37,23 +37,16 @@ KEYWORDS:
     | 'NgModule'
     | 'implements'
     | '@'
+    | 'new'
+    | 'await'
     ;
 
 
-
-
-
-//Identifiers
-//IDENTIFIER:
-//    ([a-zA-Z_\\u0600-\\u06FF][a-zA-Z0-9_\\u0600-\\u06FF-]*)
-//    | ([a-zA-Z\\u0600-\\u06FF][a-zA-Z0-9_\\u0600-\\u06FF-]*);
-
 IDENTIFIER: ([a-zA-Z_][a-zA-Z0-9_]* | [a-zA-Z][a-zA-Z0-9-]*)  ;
-NUMBER:[0-9]+ ('.' [0-9]+)?;
+NUMBER:[0-9]+ ('.' [0-9]+)? ('%' | 'px' | 'em' | 'rem' | 'vh' | 'vw')?;
 //ARABIC:(~["\r\n])* ;
 STRING: '"' (~["\r\n])* '"' | '\'' (~['\r\n])* '\'';
 BOOLEAN: 'true' | 'false';
-
 
 // تعريف الرموز الخاصة بـ Angular
 BINDING_START: '{{';   // بداية التعبير المربوط
@@ -63,17 +56,12 @@ OF: 'of';
 NGFOR:'ngFor';
 NGIF:'ngIf';
 
-
-
 // علامات HTML المستخدمة في Angular
 TAG_OPEN: '<' IDENTIFIER;
 TAG_CLOSE: '</'IDENTIFIER'>';
 //TAG_SLASH: '/';
 //TAG_NAME: [a-zA-Z][a-zA-Z0-9-]*;
 //ATTRIBUTE: IDENTIFIER ASSIGN STRING; // Attribute like class="button"
-
-
-
 
 PLUS:'+';
 SUB:'-';
@@ -96,6 +84,10 @@ RSQUARE: ']';
 OR:'||';
 AND:'&&';
 SHEE:'|';
+PERCIENT: '%';
+HS:'#';
+ARROW: '=>';
+
 
 Double_Comment
     : '/*'  ~[\r\n]*  '*/'-> skip
