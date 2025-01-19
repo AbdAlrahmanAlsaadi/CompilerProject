@@ -6,6 +6,56 @@
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/antlr/TypeScriptParser.g4" />
           <option name="autoGen" value="true" />
+          <option name="outputDir" value="C:\Users\USER\IdeaProjects\angularproject\src\antlr" />
+          <option name="libDir" value="C:\Users\USER\IdeaProjects\angularproject" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="gen" />
+          <option name="language" value="" />
+          <option name="generateVisitor" value="true" />
+        </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/src/antlr/TypeScriptLexer.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="C:\Users\USER\IdeaProjects\angularproject\src\antlr" />
+          <option name="libDir" value="" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="" />
+          <option name="language" value="" />
+          <option name="generateVisitor" value="true" />
+        </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/src/TypeScriptLexer.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="C:\Users\USER\IdeaProjects\angularproject\src\antlr" />
+          <option name="libDir" value="" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="" />
+          <option name="language" value="" />
+          <option name="generateVisitor" value="true" />
+        </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/src/TypeScriptParser.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="C:\Users\USER\IdeaProjects\angularproject\src\antlr" />
+          <option name="libDir" value="" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="" />
+          <option name="language" value="" />
+          <option name="generateVisitor" value="true" />
+        </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/TypeScriptLexer.g4" />
+          <option name="autoGen" value="true" />
+          <option name="outputDir" value="C:\Users\USER\IdeaProjects\angularproject" />
+          <option name="libDir" value="C:\Users\USER\IdeaProjects\angularproject" />
+          <option name="encoding" value="" />
+          <option name="pkg" value="" />
+          <option name="language" value="" />
+          <option name="generateVisitor" value="true" />
+        </PerGrammarGenerationSettings>
+        <PerGrammarGenerationSettings>
+          <option name="fileName" value="$PROJECT_DIR$/TypeScriptParser.g4" />
+          <option name="autoGen" value="true" />
           <option name="outputDir" value="C:\Users\USER\IdeaProjects\angularproject" />
           <option name="libDir" value="C:\Users\USER\IdeaProjects\angularproject" />
           <option name="encoding" value="" />
