@@ -99,9 +99,7 @@ public class Main {
         }
     }
 
-    /**
-     * وظيفة لقراءة محتوى الملف وتحويله إلى String
-     */
+
     private static String readFile(String filePath) throws IOException {
         StringBuilder code = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {

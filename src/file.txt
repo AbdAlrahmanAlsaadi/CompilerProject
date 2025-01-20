@@ -1,110 +1,130 @@
-<div class="container">
-
-  <div class="product-list">
-    <ul>
-      <li
-        *ngFor="let product of products"
-        (click)="selectProduct(product)"
-        class="product-item"
-      >
-        <img [src]="product.image" alt="{{ product.name }}" class="product-image">
-        {{ product.name }}
-      </li>
-    </ul>
-  </div>
-
-
-  <div class="product-details">
-    <div *ngIf="selectedProduct">
-      <h2>{{ selectedProduct.name }}</h2>
-      <img [src]="selectedProduct.image" alt="{{ selectedProduct.name }}" class="product-detail-image">
-      <p>{{ selectedProduct.details }}</p>
-    </div>
-    <div *ngIf="!selectedProduct">
-      <p>Please select a product to see details.</p>
-    </div>
-  </div>
-</div>
-
 .container {
     display: flex;
-    height: 100vh;
-    padding: 10px;
+    justify-content: space-between;
+    padding: 20px;
   }
 
   .product-list {
-    width: 30%;
-    border-right: 1px solid #ccc;
-    padding: 10px;
-  }
-
-  .product-item {
-    cursor: pointer;
-    margin-bottom: 20px;
+    width: 90%;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 20px;
   }
 
-  .product-image {
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
-    border-radius: 5px;
+  .product-card {
+    width: 200px;
+    text-align: center;
+    cursor: pointer;
   }
+
+  .product-card img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+  }
+
 
   .product-details {
-    width: 70%;
-    padding: 10px;
+    width: 50%;
+    height: 400px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    text-align: center;
+    position: absolute;
+    left: 200px;
+    top: 180px;
   }
 
-  .product-detail-image {
-    display: block;
-    margin-bottom: 10px;
+  .product-details img {
     width: 200px;
-    height: auto;
-    border-radius: 5px;
-  }
-
-  .product-details p {
-    font-size: 18px;
+    height: 200px;
+    object-fit: cover;
   }
 
 
-  import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+  <div class="container">
+
+    <div class="product-list">
+      <div *ngFor="let item of items" class="product-card" (click)="onselect(item)">
+        <img [src]="item.image" alt="{{ item.name }}">
+        <h3>{{item.name }}</h3>
+      </div>
+    </div>
+
+
+    <div class="product-details" *ngIf="selectedItem">
+      <h2>{{ selectedItem.name }}</h2>
+      <img [src]="selectedItem.image" alt="{{ selectedItem.name }}">
+      <p>price: {{ selectedItem.price }} s.p </p>
+      <p>color: {{ selectedItem.color }}</p>
+    </div>
+  </div>
+
+  import { Component, OnInit } from '@angular/core';
+import { ProductsService } from '../../services/products.service';
+import { NgFor, NgIf } from '@angular/common';
+
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './app.component.html', // ربط ملف HTML
-  styleUrls: ['./app.component.css']   // ربط ملف CSS
+  selector: 'app-products',
+  imports: [NgFor,NgIf],
+  templateUrl: './products.component.html',
+  styleUrl: './products.component.css'
 })
-export class AppComponent {
-  selectedProduct: any = null;
+export class ProductsComponent implements OnInit{
+  items: any[] = [];
+  selectedItem:any=null;
 
-  products = [
-    {
-      name: 'Apple iPhone 14',
-      image: 'https://creativeschoolarabia.com/wp-content/webp-express/webp-images/uploads/2019/02/Moon-lunar-full-moon-amazing-creative-school-arabia-%D8%B5%D9%88%D8%B1%D8%A9-%D9%84%D9%84%D9%82%D9%85%D8%B1-%D8%AA%D8%B5%D9%88%D9%8A%D8%B1-%D8%A7%D9%84%D9%82%D9%85%D8%B1-%D8%AA%D8%B5%D9%88%D9%8A%D8%B1-%D9%81%D9%88%D8%AA%D9%88%D8%BA%D8%B1%D8%A7%D9%81%D9%8A-%D8%B5%D9%88%D8%B1%D8%A9-%D9%84%D9%84%D9%82%D9%85%D8%B1-%D9%85%D9%83%D9%88%D9%86%D8%A9-%D9%85%D9%86-50-%D8%A7%D9%84%D9%81-%D8%B5%D9%88%D8%B1%D8%A9-%D8%AA%D9%85-%D8%AA%D8%AC%D9%85%D9%8A%D8%B9%D9%87%D8%A7-%D8%A8%D8%A7%D9%84%D9%81%D9%88%D8%AA%D9%88%D8%B4%D9%88%D8%A83-780x470.jpg.webp',
-      details: 'The latest Apple iPhone with advanced features and amazing performance.'
-    },
-    {
-      name: 'Samsung Galaxy S23',
-      image: 'https://creativeschoolarabia.com/wp-content/webp-express/webp-images/uploads/2019/02/Moon-lunar-full-moon-amazing-creative-school-arabia-%D8%B5%D9%88%D8%B1%D8%A9-%D9%84%D9%84%D9%82%D9%85%D8%B1-%D8%AA%D8%B5%D9%88%D9%8A%D8%B1-%D8%A7%D9%84%D9%82%D9%85%D8%B1-%D8%AA%D8%B5%D9%88%D9%8A%D8%B1-%D9%81%D9%88%D8%AA%D9%88%D8%BA%D8%B1%D8%A7%D9%81%D9%8A-%D8%B5%D9%88%D8%B1%D8%A9-%D9%84%D9%84%D9%82%D9%85%D8%B1-%D9%85%D9%83%D9%88%D9%86%D8%A9-%D9%85%D9%86-50-%D8%A7%D9%84%D9%81-%D8%B5%D9%88%D8%B1%D8%A9-%D8%AA%D9%85-%D8%AA%D8%AC%D9%85%D9%8A%D8%B9%D9%87%D8%A7-%D8%A8%D8%A7%D9%84%D9%81%D9%88%D8%AA%D9%88%D8%B4%D9%88%D8%A83-780x470.jpg.webp',
-      details: 'A flagship phone from Samsung with top-notch performance and features.'
-    },
-    {
-      name: 'Google Pixel 7',
-      image: 'https://creativeschoolarabia.com/wp-content/webp-express/webp-images/uploads/2019/02/Moon-lunar-full-moon-amazing-creative-school-arabia-%D8%B5%D9%88%D8%B1%D8%A9-%D9%84%D9%84%D9%82%D9%85%D8%B1-%D8%AA%D8%B5%D9%88%D9%8A%D8%B1-%D8%A7%D9%84%D9%82%D9%85%D8%B1-%D8%AA%D8%B5%D9%88%D9%8A%D8%B1-%D9%81%D9%88%D8%AA%D9%88%D8%BA%D8%B1%D8%A7%D9%81%D9%8A-%D8%B5%D9%88%D8%B1%D8%A9-%D9%84%D9%84%D9%82%D9%85%D8%B1-%D9%85%D9%83%D9%88%D9%86%D8%A9-%D9%85%D9%86-50-%D8%A7%D9%84%D9%81-%D8%B5%D9%88%D8%B1%D8%A9-%D8%AA%D9%85-%D8%AA%D8%AC%D9%85%D9%8A%D8%B9%D9%87%D8%A7-%D8%A8%D8%A7%D9%84%D9%81%D9%88%D8%AA%D9%88%D8%B4%D9%88%D8%A83-780x470.jpg.webp',
-      details: 'Googles latest smartphone with AI-powered camera and smooth Android experience.'
-    }
-  ];
+  constructor(private productsService: ProductsService) { }
+  ngOnInit(): void {
+     this.items = this.productsService.getProducts();
+  }
 
-  selectProduct(product: any) {
-    this.selectedProduct = product;
+  onselect(item: any): void {
+    this.selectedItem = item;
   }
 }
 
 
+h1{
+  text-align: center;
+}
+
+<h1>
+    products
+</h1>
+<app-products />
+
+
+import { Component } from '@angular/core';
+import { ProductsComponent } from "../components/products/products.component";
+
+
+@Component({
+  selector: 'app-home',
+  imports: [ProductsComponent],
+  templateUrl: './home.component.html',
+  styleUrl: './home.component.css'
+})
+export class HomeComponent {
+
+}
+
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { HeaderComponent } from './components/header/header.component';
+import { HomeComponent } from './home/home.component';
+
+
+@Component({
+  selector: 'app-root',
+  imports: [RouterOutlet, HeaderComponent, HomeComponent],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
+})
+export class AppComponent {
+  title = 'first-app';
+}
 

@@ -139,7 +139,7 @@ classDeclaration: decorator* KEYWORDS? KEYWORDS IDENTIFIER ((KEYWORDS|KEYWORDS) 
 
 
 //tm
-classBody: (classCall|funclass|propertyDeclaration|constructorDeclaration|variableDeclaration)+ ;
+classBody: (classCall|funclass|propertyDeclaration|constructorDeclaration|variableDeclaration)* ;
 //tm
 classCall: KEYWORDS IDENTIFIER OPENB CLOSEB IDENTIFIER ASSIGN KEYWORDS IDENTIFIER TAG_OPEN BIGGER OPENB CLOSEB SEMICOLON ;
 //tm
