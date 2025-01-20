@@ -1,41 +1,35 @@
 package expression;
 
 public class ParameterListNode implements ASTNode {
-    private String accessModifier; // معدل الوصول
-    private String identifier; // المعرف
-    private Object type; // النوع (يمكن أن يكون ASTNode أو String)
+    private String identifier;
+    private ASTNode type;  // نوع العنصر سواء كان arrayLiteral أو type
+    private String accessModifier;
 
-    public ParameterListNode(String accessModifier, String identifier, Object type) {
-        this.accessModifier = accessModifier;
+    public ParameterListNode(String identifier, ASTNode type, String accessModifier) {
         this.identifier = identifier;
         this.type = type;
-    }
-
-    // Getters
-    public String getAccessModifier() {
-        return accessModifier;
+        this.accessModifier = accessModifier;
     }
 
     public String getIdentifier() {
         return identifier;
     }
 
-    public Object getType() {
+    public ASTNode getType() {
         return type;
+    }
+
+    public String getAccessModifier() {
+        return accessModifier;
     }
 
     @Override
     public void prettyPrint(String indent) {
-        System.out.println(indent + "ParameterList:");
+        System.out.println(indent + "Parameter:");
         if (accessModifier != null) {
             System.out.println(indent + "  Access Modifier: " + accessModifier);
         }
         System.out.println(indent + "  Identifier: " + identifier);
-        System.out.println(indent + "  Type:");
-        if (type instanceof ASTNode) {
-            ((ASTNode) type).prettyPrint(indent + "    ");
-        } else {
-            System.out.println(indent + "    " + type); // إذا كان النوع String
-        }
+        type.prettyPrint(indent + "  ");
     }
 }

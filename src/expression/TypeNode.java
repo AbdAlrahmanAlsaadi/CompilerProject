@@ -3,45 +3,53 @@ package expression;
 import java.util.List;
 
 public class TypeNode implements ASTNode {
-    private String baseType; // النوع الأساسي (مثل number, string)
-    private boolean isArray; // إذا كان النوع مصفوفة
-    private boolean isGeneric; // إذا كان النوع عامًا (مثل Array<number>)
-    private List<TypeItemNode> tupleElements; // عناصر القيم الزوجية (لأنواع tuple)
+    public enum TypeKind {
+        SIMPLE,          // Represents typeItem
+        ARRAY,           // Represents typeItem[]
+        GENERIC,         // Represents TYPES<typeItem>
+        TUPLE            // Represents [typeItem, typeItem, ...]
+    }
 
-    public TypeNode(String baseType, boolean isArray, boolean isGeneric, List<TypeItemNode> tupleElements) {
-        this.baseType = baseType;
-        this.isArray = isArray;
-        this.isGeneric = isGeneric;
+    private TypeKind kind;
+    private TypeItemNode simpleType;           // For SIMPLE and GENERIC
+    private String genericType;                // For GENERIC
+    private List<TypeItemNode> tupleElements;  // For TUPLE and ARRAY
+
+    // Constructor for SIMPLE type
+    public TypeNode(TypeItemNode simpleType) {
+        this.kind = TypeKind.SIMPLE;
+        this.simpleType = simpleType;
+    }
+
+    // Constructor for ARRAY type
+    public TypeNode(TypeItemNode simpleType, boolean isArray) {
+        this.kind = TypeKind.ARRAY;
+        this.simpleType = simpleType;
+    }
+
+    // Constructor for GENERIC type
+    public TypeNode(String genericType, TypeItemNode simpleType) {
+        this.kind = TypeKind.GENERIC;
+        this.genericType = genericType;
+        this.simpleType = simpleType;
+    }
+
+    // Constructor for TUPLE type
+    public TypeNode(List<TypeItemNode> tupleElements) {
+        this.kind = TypeKind.TUPLE;
         this.tupleElements = tupleElements;
     }
 
-    public void setBaseType(String baseType) {
-        this.baseType = baseType;
+    public TypeKind getKind() {
+        return kind;
     }
 
-    public void setArray(boolean array) {
-        isArray = array;
+    public TypeItemNode getSimpleType() {
+        return simpleType;
     }
 
-    public void setGeneric(boolean generic) {
-        isGeneric = generic;
-    }
-
-    public void setTupleElements(List<TypeItemNode> tupleElements) {
-        this.tupleElements = tupleElements;
-    }
-
-    // Getters
-    public String getBaseType() {
-        return baseType;
-    }
-
-    public boolean isArray() {
-        return isArray;
-    }
-
-    public boolean isGeneric() {
-        return isGeneric;
+    public String getGenericType() {
+        return genericType;
     }
 
     public List<TypeItemNode> getTupleElements() {
@@ -50,18 +58,26 @@ public class TypeNode implements ASTNode {
 
     @Override
     public void prettyPrint(String indent) {
-        System.out.println(indent + "Type:");
-        if (isArray) {
-            System.out.println(indent + "  Array of: " + baseType);
-        } else if (isGeneric) {
-            System.out.println(indent + "  Generic: " + baseType);
-        } else if (tupleElements != null) {
-            System.out.println(indent + "  Tuple:");
-            for (TypeItemNode element : tupleElements) {
-                element.prettyPrint(indent + "    ");
-            }
-        } else {
-            System.out.println(indent + "  Base Type: " + baseType);
+        switch (kind) {
+            case SIMPLE:
+                System.out.println(indent + "Type: SIMPLE");
+                simpleType.prettyPrint(indent + "  ");
+                break;
+            case ARRAY:
+                System.out.println(indent + "Type: ARRAY");
+                simpleType.prettyPrint(indent + "  ");
+                break;
+            case GENERIC:
+                System.out.println(indent + "Type: GENERIC");
+                System.out.println(indent + "  Generic Type: " + genericType);
+                simpleType.prettyPrint(indent + "  ");
+                break;
+            case TUPLE:
+                System.out.println(indent + "Type: TUPLE");
+                for (TypeItemNode element : tupleElements) {
+                    element.prettyPrint(indent + "  ");
+                }
+                break;
         }
     }
 }

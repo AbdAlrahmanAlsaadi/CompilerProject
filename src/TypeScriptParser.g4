@@ -18,6 +18,7 @@ statement:
     | listVar
     | cssDec
     | awaitDef
+
     ;
 
 operator:
@@ -35,13 +36,13 @@ operator:
 typeItem:
         TYPES
    | IDENTIFIER
+   | STRING
 ;
 type:
     | typeItem
-    | typeItem LSQUARE RSQUARE                  //`number[]`
+    | typeItem LSQUARE RSQUARE
     | TYPES LESS typeItem BIGGER           //`Array<number>`
     | LSQUARE typeItem (COMMA typeItem)* RSQUARE    //`[string, number]`
-
     ;
 //Access Modifier
 accessMoidifers:
@@ -77,9 +78,7 @@ enumAccess:
 //var decleration start
 variableDeclaration:
     decorator* accessMoidifers? KEYWORDS? parameter (ASSIGN (expression | tupleLiteral))? SEMICOLON
-    | expression operator expression*  SEMICOLON
-
-    ;
+    | expression operator expression*  SEMICOLON;
 tupleLiteral:
     LSQUARE expression (COMMA expression)* RSQUARE  //`["Alice", 25]`
     ;
@@ -114,7 +113,7 @@ arrowFunction:
     OPENB? parameterFunction? CLOSEB? ARROW block;
 
 
-awaitDef: KEYWORDS IDENTIFIER (DOT IDENTIFIER)* OPENB block CLOSEB (DOT IDENTIFIER OPENB CLOSEB)? SEMICOLON;
+awaitDef: KEYWORDS IDENTIFIER (DOT IDENTIFIER)* OPENB block CLOSEB (DOT IDENTIFIER OPENB CLOSEB)? SEMICOLON?;
 
 parameterFunction:
     parameter (COMMA parameter)*;
@@ -125,7 +124,7 @@ functionCall:
     (IDENTIFIER | KEYWORDS) (DOT IDENTIFIER)* OPENB argumentList? CLOSEB statement?;
 
 block:
-    LBRACE (statement | functionCall | thisAssignment| arrowFunction|parameterList)* RBRACE;
+    LBRACE (arrayLiteral|statement | functionCall | thisAssignment| arrowFunction|parameterList)* RBRACE;
 arrow: ARROW expression;
 argumentList:
        statement (COMMA statement)*
@@ -155,8 +154,7 @@ constructorDeclaration:
 ;
 //tm
 parameterList:
-    accessMoidifers? IDENTIFIER COLON (type|STRING)
-;
+    accessMoidifers? IDENTIFIER COLON (arrayLiteral|type);
 thisAssignment:
     KEYWORDS DOT IDENTIFIER ASSIGN IDENTIFIER SEMICOLON|
     (IDENTIFIER|KEYWORDS) operator (IDENTIFIER|KEYWORDS) ASSIGN (IDENTIFIER|KEYWORDS) operator (IDENTIFIER|KEYWORDS) (DOT (IDENTIFIER|KEYWORDS) )* OPENB? CLOSEB? SEMICOLON

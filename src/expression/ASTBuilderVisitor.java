@@ -14,18 +14,27 @@ public class ASTBuilderVisitor extends TypeScriptParserBaseVisitor<ASTNode> {
     // زيارة قاعدة operator
     @Override
     public ASTNode visitOperator(TypeScriptParser.OperatorContext ctx) {
-        // الحصول على النص الخاص بالعملية
+        // Retrieve the operator text (e.g., "+", "-", ">", etc.)
         String operator = ctx.getText();
         return new OperatorNode(operator);
     }
 
-    // زيارة قاعدة typeItem
+
     @Override
     public ASTNode visitTypeItem(TypeScriptParser.TypeItemContext ctx) {
-        // الحصول على اسم النوع (إما TYPES أو IDENTIFIER)
-        String typeName = ctx.getText();
-        return new TypeItemNode(typeName);
+        // Check which terminal is present and create a corresponding TypeItemNode
+        if (ctx.TYPES() != null) {
+            return new TypeItemNode(ctx.TYPES().getText(), TypeItemNode.TypeItemType.TYPES);
+        } else if (ctx.IDENTIFIER() != null) {
+            return new TypeItemNode(ctx.IDENTIFIER().getText(), TypeItemNode.TypeItemType.IDENTIFIER);
+        } else if (ctx.STRING() != null) {
+            return new TypeItemNode(ctx.STRING().getText(), TypeItemNode.TypeItemType.STRING);
+        }
+        // Default case: this shouldn't happen if the grammar is correct
+        throw new IllegalStateException("Invalid type item");
     }
+
+
 
     @Override
     public ASTNode visitDirectiveElement(TypeScriptParser.DirectiveElementContext ctx) {
@@ -85,46 +94,51 @@ public class ASTBuilderVisitor extends TypeScriptParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitFunctionDeclaration(TypeScriptParser.FunctionDeclarationContext ctx) {
-        // زيارة الديكورات
-        List<ASTNode> decorators = new ArrayList<>();
-        for (var decoratorCtx : ctx.decorator()) {
-            decorators.add(visit(decoratorCtx));
+        // Parse decorators
+        List<DecoratorNode> decorators = new ArrayList<>();
+        if (ctx.decorator() != null) {
+            for (var decoratorCtx : ctx.decorator()) {
+                decorators.add((DecoratorNode) visit(decoratorCtx));
+            }
         }
 
-        // معدل الوصول
-        String accessModifier = ctx.accessMoidifers() != null ? ctx.accessMoidifers().getText() : null;
-
-        // جمع جميع الـ keywords في قائمة
-        List<String> keywords = new ArrayList<>();
-        for (var keywordCtx : ctx.KEYWORDS()) {
-            keywords.add(keywordCtx.getText());
+        // Parse access modifiers
+        AccessModifiersNode accessModifiers = null;
+        if (ctx.accessMoidifers() != null) {
+            accessModifiers = (AccessModifiersNode) visit(ctx.accessMoidifers());
         }
 
-        // جمع جميع الـ identifiers في قائمة
-        List<String> identifiers = new ArrayList<>();
-        for (var idCtx : ctx.IDENTIFIER()) {
-            identifiers.add(idCtx.getText());
-        }
+        // Parse keyword
+        String keyword = ctx.KEYWORDS(0) != null ? ctx.KEYWORDS(0).getText() : null;
 
-        // نوع الإرجاع
-        ASTNode returnType = null;
-        if (ctx.type() != null) {
-            returnType = visit(ctx.type());
-        } else if (keywords.size() > 1) {
-            returnType = new TypeNode(keywords.get(1), false, false, null);
-        }
+        // Parse identifier
+        String identifier = ctx.IDENTIFIER(0) != null ? ctx.IDENTIFIER(0).getText() : null;
 
-        // المعاملات
-        List<ASTNode> parameters = new ArrayList<>();
+        // Parse assigned keyword
+        String assignedKeyword = ctx.ASSIGN() != null && ctx.KEYWORDS(1) != null ? ctx.KEYWORDS(1).getText() : null;
+
+        // Parse parameters
+        List<ParameterNode> parameters = new ArrayList<>();
         if (ctx.parameterFunction() != null) {
-            parameters = ((ParameterFunctionNode) visit(ctx.parameterFunction())).getParameters();
+            parameters = (List<ParameterNode>) visit(ctx.parameterFunction());
         }
 
-        // كتلة الدالة
-        ASTNode block = visit(ctx.block());
+        // Parse return type
+        TypeNode returnType = null;
+        if (ctx.type() != null) {
+            returnType = (TypeNode) visit(ctx.type());
+        }
 
-        return new FunctionDeclarationNode(decorators, accessModifier, keywords, identifiers, returnType, parameters, block);
+        // Parse block
+        BlockNode block = null;
+        if (ctx.block() != null) {
+            block = (BlockNode) visit(ctx.block());
+        }
+
+        // Return the constructed FunctionDeclarationNode
+        return new FunctionDeclarationNode(decorators, accessModifiers, keyword, identifier, assignedKeyword, parameters, returnType, block);
     }
+
 
 
     @Override
@@ -211,22 +225,43 @@ public class ASTBuilderVisitor extends TypeScriptParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitVariableDeclaration(TypeScriptParser.VariableDeclarationContext ctx) {
-        List<ASTNode> decorators = new ArrayList<>();
-        for (var decoratorCtx : ctx.decorator()) {
-            decorators.add(visit(decoratorCtx));
-        }
-        String accessModifier = ctx.accessMoidifers() != null ? ctx.accessMoidifers().getText() : null;
-        String keyword = ctx.KEYWORDS() != null ? ctx.KEYWORDS().getText() : null;
-        ASTNode parameter = visit(ctx.parameter());
+        // Case 1: Decorators, parameter, and optional initial value
+        if (ctx.parameter() != null) {
+            List<ASTNode> decorators = new ArrayList<>();
+            for (var decoratorCtx : ctx.decorator()) {
+                decorators.add(visit(decoratorCtx));
+            }
 
-        // زيارة expression بشكل صحيح
-        ASTNode initialValue = null;
-        if (ctx.expression() != null) {
-            initialValue = visit(ctx.expression(0)); // زيارة أول expression
+            String accessModifier = ctx.accessMoidifers() != null ? ctx.accessMoidifers().getText() : null;
+            String keyword = ctx.KEYWORDS() != null ? ctx.KEYWORDS().getText() : null;
+            ASTNode parameter = visit(ctx.parameter());
+
+            ASTNode initialValue = null;
+            if (ctx.expression() != null && !ctx.expression().isEmpty()) {
+                initialValue = visit(ctx.expression(0)); // Handle the first expression
+            }
+
+            return new VariableDeclarationNode(decorators, accessModifier, keyword, parameter, initialValue);
         }
 
-        return new VariableDeclarationNode(decorators, accessModifier, keyword, parameter, initialValue);
+        // Case 2: Expression with operators
+        List<ASTNode> expressions = new ArrayList<>();
+        List<OperatorNode> operators = new ArrayList<>();
+
+        for (var exprCtx : ctx.expression()) {
+            expressions.add(visit(exprCtx)); // Visit each expression
+        }
+
+        if (ctx.operator() != null) {
+            // Handle a single operator context (if applicable in the grammar)
+            operators.add(new OperatorNode(ctx.operator().getText()));
+        }
+
+        return new VariableDeclarationNode(expressions, operators);
     }
+
+
+
 
     @Override
     public ASTNode visitTupleLiteral(TypeScriptParser.TupleLiteralContext ctx) {
@@ -273,31 +308,47 @@ public class ASTBuilderVisitor extends TypeScriptParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitType(TypeScriptParser.TypeContext ctx) {
-        if (ctx.typeItem() != null && ctx.LSQUARE() != null && ctx.RSQUARE() != null) {
-            // التعامل مع النوع مثل: `number[]`
-            return new TypeNode(ctx.typeItem(0).getText(), true, false, null);
-        } else if (ctx.TYPES() != null && ctx.LESS() != null && ctx.typeItem() != null && ctx.BIGGER() != null) {
-            // التعامل مع النوع مثل: `Array<number>`
-            return new TypeNode(ctx.TYPES().getText(), false, true, null);
-        } else if (ctx.LSQUARE() != null && ctx.typeItem() != null && ctx.COMMA() != null && ctx.RSQUARE() != null) {
-            // التعامل مع النوع مثل: `[string, number]`
+        // Case 1: SIMPLE type
+        if (ctx.typeItem().size() == 1 && ctx.LSQUARE() == null && ctx.LESS() == null) {
+            TypeItemNode simpleType = (TypeItemNode) visit(ctx.typeItem(0));
+            return new TypeNode(simpleType);
+        }
+
+        // Case 2: ARRAY type
+        if (ctx.typeItem().size() == 1 && ctx.LSQUARE() != null && ctx.RSQUARE() != null) {
+            TypeItemNode simpleType = (TypeItemNode) visit(ctx.typeItem(0));
+            return new TypeNode(simpleType, true);
+        }
+
+        // Case 3: GENERIC type
+        if (ctx.TYPES() != null && ctx.LESS() != null && ctx.BIGGER() != null) {
+            String genericType = ctx.TYPES().getText();
+            TypeItemNode simpleType = (TypeItemNode) visit(ctx.typeItem(0));
+            return new TypeNode(genericType, simpleType);
+        }
+
+        // Case 4: TUPLE type
+        if (ctx.LSQUARE() != null && ctx.RSQUARE() != null && ctx.typeItem().size() > 1) {
             List<TypeItemNode> tupleElements = new ArrayList<>();
             for (TypeScriptParser.TypeItemContext typeItemCtx : ctx.typeItem()) {
-                tupleElements.add(new TypeItemNode(typeItemCtx.getText()));
+                tupleElements.add((TypeItemNode) visit(typeItemCtx));
             }
-            return new TypeNode(null, false, false, tupleElements);
-        } else {
-            // التعامل مع النوع الأساسي مثل: `number`
-            return new TypeNode(ctx.typeItem(0).getText(), false, false, null);
+            return new TypeNode(tupleElements);
         }
+
+        // Default case: should not occur if grammar is correct
+        throw new IllegalStateException("Invalid type rule encountered");
     }
+
+
     // زيارة قاعدة accessModifiers
     @Override
     public ASTNode visitAccessMoidifers(TypeScriptParser.AccessMoidifersContext ctx) {
-        // الحصول على محدد الوصول
+        // استخراج النص الخاص بالـ modifier
         String modifier = ctx.KEYWORDS().getText();
-        return new AccessModifierNode(modifier);
+        return new AccessModifiersNode(modifier);
     }
+
 
     @Override
     public ASTNode visitFunctionCall(TypeScriptParser.FunctionCallContext ctx) {
@@ -540,22 +591,31 @@ public class ASTBuilderVisitor extends TypeScriptParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitParameterList(TypeScriptParser.ParameterListContext ctx) {
-        // استخراج معدل الوصول (إن وجد)
-        String accessModifier = ctx.accessMoidifers() != null ? ctx.accessMoidifers().getText() : null;
-
-        // استخراج المعرف
-        String identifier = ctx.IDENTIFIER().getText();
-
-        // تحديد النوع (type أو STRING)
-        Object type;
-        if (ctx.type() != null) {
-            type = visit(ctx.type()); // إذا كان النوع type
-        } else {
-            type = ctx.STRING().getText(); // إذا كان النوع STRING
+        // Parse the access modifier (if any)
+        String accessModifier = null;
+        if (ctx.accessMoidifers() != null) {
+            accessModifier = ctx.accessMoidifers().getText();
         }
 
-        return new ParameterListNode(accessModifier, identifier, type);
+        // Parse the identifier
+        String identifier = ctx.IDENTIFIER().getText();
+
+        // Parse the type (either arrayLiteral or type)
+        ASTNode type = null;
+        if (ctx.arrayLiteral() != null) {
+            type = visit(ctx.arrayLiteral());
+        } else if (ctx.type() != null) {
+            type = visit(ctx.type());
+        }
+
+        // Return the new ParameterListNode
+        return new ParameterListNode(identifier, type, accessModifier);
     }
+
+
+
+
+
 
 
     @Override

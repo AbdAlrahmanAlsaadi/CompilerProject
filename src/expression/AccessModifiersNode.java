@@ -1,9 +1,9 @@
 package expression;
 
-public class AccessModifierNode implements ASTNode {
-    private String modifier; // محدد الوصول (مثل public, private)
+public class AccessModifiersNode implements ASTNode {
+    private String modifier;
 
-    public AccessModifierNode(String modifier) {
+    public AccessModifiersNode(String modifier) {
         this.modifier = modifier;
     }
 
