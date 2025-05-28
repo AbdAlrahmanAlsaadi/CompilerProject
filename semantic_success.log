@@ -1,0 +1,5 @@
+[SUCCESS] Data type 'string' for variable 'message' is valid.
+[SUCCESS] Variable 'message' declared successfully in scope 'class'.
+[SUCCESS] Variable 'message' is used correctly.
+[SUCCESS] Method 'show' declared successfully in scope 'class'.
+[SUCCESS] Method 'log' declared successfully in scope 'class'.

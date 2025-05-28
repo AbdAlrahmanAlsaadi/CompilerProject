@@ -1,0 +1,12 @@
+@Component({
+  selector: "dupe-method"
+})
+class MyComponent {
+
+  log() {
+  }
+
+  log() {
+
+}
+}

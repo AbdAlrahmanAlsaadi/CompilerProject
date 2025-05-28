@@ -1,0 +1,12 @@
+@Component({
+  selector: "no-vars"
+})
+class SimpleComponent {
+  logData() {
+    console.log(data);
+  }
+
+  handleClick() {
+    console.log(data);
+  }
+}

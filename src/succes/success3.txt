@@ -1,0 +1,14 @@
+@Component({
+  selector: "with-constructor"
+})
+class WithConstructor {
+  let message: string;
+
+  constructor(msg: string) {
+    message = msg;
+  }
+
+  show() {
+    console.log(message);
+  }
+}

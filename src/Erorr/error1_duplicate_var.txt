@@ -1,0 +1,6 @@
+@Component({
+  selector: "dupe"
+})
+class Dup {
+  let a: string;
+  let a: string; }

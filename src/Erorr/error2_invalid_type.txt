@@ -1,0 +1,6 @@
+@Component({
+  selector: "invalid"
+})
+class BadType {
+  let danger: float;
+}

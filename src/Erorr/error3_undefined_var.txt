@@ -1,0 +1,6 @@
+@Component({
+  selector: "oops"
+})
+class UndefinedUse {
+  myMethod() {
+    name = "Angular";}}

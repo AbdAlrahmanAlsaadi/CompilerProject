@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/angularproject.iml" filepath="$PROJECT_DIR$/angularproject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/AngularCompilerProject.iml" filepath="$PROJECT_DIR$/AngularCompilerProject.iml" />
     </modules>
   </component>
 </project>

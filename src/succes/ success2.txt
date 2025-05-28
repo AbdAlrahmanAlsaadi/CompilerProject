@@ -1,0 +1,10 @@
+@Component({
+  selector: "success-example"
+})
+class Simple {
+  let message: string;
+
+  greet() {
+    console.log(message);
+  }
+}

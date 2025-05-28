@@ -1,0 +1,8 @@
+@Component({
+  selector: "wrong-click"
+})
+class ClickFail {
+  clickHandler() {
+    logMessage();
+  }
+}

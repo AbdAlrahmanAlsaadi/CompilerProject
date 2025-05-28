@@ -1,130 +1,45 @@
-.container {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-  }
+// بداية الكود
 
-  .product-list {
-    width: 90%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
+int x;        // تعريف متغير عام
+int y;        // تعريف متغير عام
 
-  .product-card {
-    width: 200px;
-    text-align: center;
-    cursor: pointer;
-  }
+// دالة رئيسية
+void main() {
+    int a;    // تعريف متغير محلي في main
+    int b;    // تعريف متغير محلي في main
 
-  .product-card img {
-    width: 100%;
-    height: 110px;
-    object-fit: cover;
-  }
+    a = 5;
+    b = 10;
 
-
-  .product-details {
-    width: 50%;
-    height: 400px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    text-align: center;
-    position: absolute;
-    left: 200px;
-    top: 180px;
-  }
-
-  .product-details img {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-  }
-
-
-  <div class="container">
-
-    <div class="product-list">
-      <div *ngFor="let item of items" class="product-card" (click)="onselect(item)">
-        <img [src]="item.image" alt="{{ item.name }}">
-        <h3>{{item.name }}</h3>
-      </div>
-    </div>
-
-
-    <div class="product-details" *ngIf="selectedItem">
-      <h2>{{ selectedItem.name }}</h2>
-      <img [src]="selectedItem.image" alt="{{ selectedItem.name }}">
-      <p>price: {{ selectedItem.price }} s.p </p>
-      <p>color: {{ selectedItem.color }}</p>
-    </div>
-  </div>
-
-  import { Component, OnInit } from '@angular/core';
-import { ProductsService } from '../../services/products.service';
-import { NgFor, NgIf } from '@angular/common';
-
-
-@Component({
-  selector: 'app-products',
-  imports: [NgFor,NgIf],
-  templateUrl: './products.component.html',
-  styleUrl: './products.component.css'
-})
-export class ProductsComponent implements OnInit{
-  items: any[] = [];
-  selectedItem:any=null;
-
-  constructor(private productsService: ProductsService) { }
-  ngOnInit(): void {
-     this.items = this.productsService.getProducts();
-  }
-
-  onselect(item: any): void {
-    this.selectedItem = item;
-  }
+    int a;
+    foo();
 }
 
+// دالة foo
+void foo() {
+    int x;    // تعريف متغير محلي x في foo (ليس تكرارًا إذا كان النظام يدعم scopes)
+    int y;    // تعريف محلي y في foo
 
-h1{
-  text-align: center;
+    x = 20;
+    y = 30;
+
+    // تعريف مكرر في foo
+    int y;    // خطأ: تكرار متغير y في نفس النطاق المحلي
 }
 
-<h1>
-    products
-</h1>
-<app-products />
+// دالة bar
+void bar() {
+    int z;    // متغير محلي
+    int w;    // متغير محلي
 
+    z = 1;
+    w = 2;
 
-import { Component } from '@angular/core';
-import { ProductsComponent } from "../components/products/products.component";
+    // تعريف متغير بدون اسم - خطأ صريح
+    int ;     // خطأ: تعريف غير مكتمل
 
-
-@Component({
-  selector: 'app-home',
-  imports: [ProductsComponent],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
-})
-export class HomeComponent {
-
+    // تعريف مكرر في نفس النطاق
+    int w;    // خطأ: تكرار متغير w
 }
 
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { HeaderComponent } from './components/header/header.component';
-import { HomeComponent } from './home/home.component';
-
-
-@Component({
-  selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent, HomeComponent],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
-})
-export class AppComponent {
-  title = 'first-app';
-}
-
+// نهاية الكود
