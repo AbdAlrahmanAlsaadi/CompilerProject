@@ -1,7 +1,5 @@
 package semantic;
 
-
-
 import SymbolTableStructure.SymbolTable2;
 
 import java.io.BufferedWriter;
@@ -24,6 +22,9 @@ public class SemanticErrorLogger {
         this.successMessages = new ArrayList<>();
     }
 
+    // ===========================
+    // Core file writing
+    // ===========================
     private void writeToFile(String filename, String message) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
             writer.write(message);
@@ -33,57 +34,71 @@ public class SemanticErrorLogger {
         }
     }
 
-    public void logError(String message) {
-        errorMessages.add(message);
-        writeToFile(ERROR_LOG_FILE, "[ERROR] " + message);
+    // ===========================
+    // Logging methods
+    // ===========================
+    public void logError(String message, int line) {
+        String formatted = "[ERROR] Line " + line + ": " + message;
+        errorMessages.add(formatted);
+        writeToFile(ERROR_LOG_FILE, formatted);
+
     }
 
-    public void logSuccess(String message) {
-        successMessages.add(message);
-        writeToFile(SUCCESS_LOG_FILE, "[SUCCESS] " + message);
+    public void logSuccess(String message, int line) {
+        String formatted = "[SUCCESS] Line " + line + ": " + message;
+        successMessages.add(formatted);
+        writeToFile(SUCCESS_LOG_FILE, formatted);
+
     }
 
-    public void checkDuplicateVariable(String name, String scope) {
+
+    // ===========================
+    // Semantic checks
+    // ===========================
+    public void checkDuplicateVariable(String name, String scope, int line) {
         if (symbolTable.contains(name, scope)) {
-            logError("Duplicate variable '" + name + "' found in scope '" + scope + "'.");
+            logError("Duplicate variable '" + name + "' found in scope '" + scope + "'.", line);
         } else {
-            logSuccess("Variable '" + name + "' declared successfully in scope '" + scope + "'.");
+            logSuccess("Variable '" + name + "' declared successfully in scope '" + scope + "'.", line);
         }
     }
 
-    public void checkVariableDefined(String name, String scope) {
+    public void checkVariableDefined(String name, String scope, int line) {
         if (!symbolTable.contains(name, scope)) {
-            logError("Variable '" + name + "' used before declaration.");
+            logError("Variable '" + name + "' used before declaration.", line);
         } else {
-            logSuccess("Variable '" + name + "' is used correctly.");
+            logSuccess("Variable '" + name + "' is used correctly.", line);
         }
     }
 
-    public void checkDuplicateMethod(String name, String scope) {
+    public void checkDuplicateMethod(String name, String scope, int line) {
         if (symbolTable.contains(name, scope)) {
-            logError("Duplicate method '" + name + "' found in scope '" + scope + "'.");
+            logError("Duplicate method '" + name + "' found in scope '" + scope + "'.", line);
         } else {
-            logSuccess("Method '" + name + "' declared successfully in scope '" + scope + "'.");
+            logSuccess("Method '" + name + "' declared successfully in scope '" + scope + "'.", line);
         }
     }
 
-    public void checkValidType(String dataType, String variableName) {
+    public void checkValidType(String dataType, String variableName, int line) {
         List<String> validTypes = List.of("string", "number", "boolean");
         if (!validTypes.contains(dataType.toLowerCase())) {
-            logError("Unknown data type '" + dataType + "' for variable '" + variableName + "'.");
+            logError("Unknown data type '" + dataType + "' for variable '" + variableName + "'.", line);
         } else {
-            logSuccess("Data type '" + dataType + "' for variable '" + variableName + "' is valid.");
+            logSuccess("Data type '" + dataType + "' for variable '" + variableName + "' is valid.", line);
         }
     }
 
-    public void checkArgumentCount(String functionName, int expected, int provided) {
+    public void checkArgumentCount(String functionName, int expected, int provided, int line) {
         if (expected != provided) {
-            logError("Function '" + functionName + "' expects " + expected + " arguments, but " + provided + " was provided.");
+            logError("Function '" + functionName + "' expects " + expected + " arguments, but " + provided + " was provided.", line);
         } else {
-            logSuccess("Function '" + functionName + "' called with correct number of arguments.");
+            logSuccess("Function '" + functionName + "' called with correct number of arguments.", line);
         }
     }
 
+    // ===========================
+    // Getters
+    // ===========================
     public List<String> getErrorMessages() {
         return errorMessages;
     }

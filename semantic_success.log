@@ -3,3 +3,16 @@
 [SUCCESS] Variable 'message' is used correctly.
 [SUCCESS] Method 'show' declared successfully in scope 'class'.
 [SUCCESS] Method 'log' declared successfully in scope 'class'.
+[SUCCESS] Line 5: Data type 'string' for variable 'a' is valid.
+[SUCCESS] Variable 'a' declared successfully in scope 'class'.
+[SUCCESS] Line 6: Data type 'string' for variable 'a' is valid.
+[SUCCESS] Line 5: Data type 'string' for variable 'a' is valid.
+[SUCCESS] Variable 'a' declared successfully in scope 'class'.
+[SUCCESS] Line 6: Data type 'string' for variable 'a' is valid.
+[SUCCESS] Line 5: Data type 'string' for variable 'a' is valid.
+[SUCCESS] Line 5: Variable 'a' declared successfully in scope 'class'.
+[SUCCESS] Line 6: Data type 'string' for variable 'a' is valid.
+[SUCCESS] Line 5: Variable 'danger' declared successfully in scope 'class'.
+[SUCCESS] Line 5: Variable 'danger' declared successfully in scope 'class'.
+[SUCCESS] Line 5: Variable 'danger' declared successfully in scope 'class'.
+[SUCCESS] Line 5: Variable 'danger' declared successfully in scope 'class'.

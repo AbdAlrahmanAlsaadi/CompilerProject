@@ -1,4 +1,2 @@
-[ERROR] ❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.
-[ERROR] ❌ Duplicate method 'log' found in class scope.
-[ERROR] ❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.
-[ERROR] ❌ Duplicate method 'log' found in class scope.
+[ERROR] Line 5: Unknown data type 'float' for variable 'danger'.
+[ERROR] Line 5: Unknown data type 'float' for variable 'danger'.

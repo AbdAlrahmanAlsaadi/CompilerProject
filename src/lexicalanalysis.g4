@@ -24,13 +24,13 @@ CLASS_ATTR:'class';
 ID_ATTR:'id';
 TABINDEX_ATTR:'tabindex';
 KEY_ATTR:'key';
-REF_ATTR:'#'; // ViewChild or template ref
+REF_ATTR:'#';
 CONSOLE :'console.log';
 HTML_TAG:'h'[1-5] | 'p' |'li' |'ul'|'html' | 'ol'|'!DOCTYPE'|'title';
 STYLE_ATTR:'color' |'fontSize'|'width'|'display'|'flexDirection'|'justifyContent'|'flexFlow'|'alignContent'|'overflowY';
 
 NUMBER:[0-9]+;
-
+IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]*;
 
 QUOTE:'"';
 EQUALS : '=';
@@ -46,11 +46,10 @@ COMMA:',';
 COLON:':';
 STRING : '"' (' '..'~')* '"';
 
-// Angular template-specific
+
 TEMPLATE_OPEN : '<';
 TEMPLATE_CLOSE : '>';
 TEMPLATE_SLASH : '/';
 
-// Ignored tokens
+
 WS : [ \t\r\n]+ -> skip;
-IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]*;

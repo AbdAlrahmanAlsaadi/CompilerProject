@@ -14,7 +14,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) {
         try {
-            CharStream input = CharStreams.fromFileName("C:\\Users\\dell\\Desktop\\AngularCompilerProject\\src\\Erorr\\error4_duplicate_method.txt");
+            CharStream input = CharStreams.fromFileName("C:\\Users\\dell\\Desktop\\AngularCompilerProject\\src\\Erorr\\error2_invalid_type.txt");
 
             lexicalanalysis lexer = new lexicalanalysis(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -22,7 +22,6 @@ public class Main {
 
             // ✅ استدعاء القاعدة العليا componentFile
             ParseTree tree = parser.componentFile();
-
             SymbolTable2 table = new SymbolTable2();
             SemanticVisitor visitor = new SemanticVisitor(table);
 

@@ -212,9 +212,11 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
     }
     @Override
     public ASTNode visitProperty(parseranalysis.PropertyContext ctx) {
+        int line = ctx.start.getLine(); // رقم السطر من الكلمة الأولى
+
         // ✅ تحقق من وجود المعرفات بشكل صحيح
         if (ctx.IDENTIFIER().size() < 2) {
-            semanticLogger.logError("Malformed property declaration: missing name or type.");
+            semanticLogger.logError("Malformed property declaration: missing name or type.", line);
             return null;
         }
 
@@ -225,23 +227,24 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
 
         // 🔍 تحقق من التكرار والنوع
         boolean isDuplicate = symbolTable.contains(name, scope);
-        semanticLogger.checkValidType(type, name);
+        semanticLogger.checkValidType(type, name, line);  // تمرير رقم السطر
 
         if (isDuplicate) {
-            semanticLogger.logError("Duplicate variable '" + name + "' found in scope '" + scope + "'.");
+            semanticLogger.logError("Duplicate variable '" + name + "' found in scope '" + scope + "'.", line);
         } else {
             symbolTable.addVariable(name, type, scope, null);
-            semanticLogger.logSuccess("Variable '" + name + "' declared successfully in scope '" + scope + "'.");
+            semanticLogger.logSuccess("Variable '" + name + "' declared successfully in scope '" + scope + "'.",line);
         }
 
         return new Property(varType, name, type);
     }
 
-
     @Override
     public ASTNode visitMethod(parseranalysis.MethodContext ctx) {
+        int line = (ctx != null) ? ctx.start.getLine() : -1;
+
         if (ctx == null || ctx.IDENTIFIER() == null || ctx.IDENTIFIER().size() == 0) {
-            semanticLogger.logError("❌ خطأ في تعريف الدالة: المعرف مفقود.");
+            semanticLogger.logError("❌ خطأ في تعريف الدالة: المعرف مفقود.", line);
             return null;
         }
 
@@ -250,7 +253,7 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
 
         // تحقق من التكرار أولاً
         if (symbolTable.contains(name, scope)) {
-            semanticLogger.logError("❌ Duplicate method '" + name + "' found in class scope.");
+            semanticLogger.logError("❌ Duplicate method '" + name + "' found in class scope.", line);
             return null;
         }
 
@@ -268,7 +271,7 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
                 symbolTable.addVariable(paramName, paramType, name, "param");
 
             } catch (Exception e) {
-                semanticLogger.logError("❌ خطأ أثناء تحليل المعاملات في الدالة '" + name + "'.");
+                semanticLogger.logError("❌ خطأ أثناء تحليل المعاملات في الدالة '" + name + "'.", line);
             }
         }
 
@@ -277,7 +280,7 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         try {
             body = (MethodBody) visit(ctx.methodBody());
         } catch (Exception e) {
-            semanticLogger.logError("❌ خطأ أثناء تحليل جسم الدالة '" + name + "'.");
+            semanticLogger.logError("❌ خطأ أثناء تحليل جسم الدالة '" + name + "'.", line);
         }
 
         // إضافة تعريف الدالة إلى السيمبول تيبل
@@ -289,25 +292,23 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitMethodBody(parseranalysis.MethodBodyContext ctx) {
         List<ASTNode> statements = new ArrayList<>();
+        int line = (ctx != null) ? ctx.start.getLine() : -1;
 
         if (ctx == null || ctx.children == null) {
-            semanticLogger.logError("❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.");
+            semanticLogger.logError("❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.", line);
             return new MethodBody(statements);
         }
 
-        for (ParseTree child : ctx.children) {
-            ASTNode stmt = (ASTNode) visit(child);
-            if (stmt != null) {
-                statements.add(stmt);
-            }
-        }
-
+        // يمكنك هنا إضافة معالجة بقية تعليمات جسم الدالة
         return new MethodBody(statements);
     }
+
+
 
     @Override
     public ASTNode visitAssignment(parseranalysis.AssignmentContext ctx) {
         String variableName = ctx.IDENTIFIER(0).getText();  // المتغير الذي يُسنَد إليه
+        int line = ctx.start.getLine();  // رقم السطر
 
         ExpressionNode value;
 
@@ -323,7 +324,9 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         }
 
         // التحقق إذا المتغير مُعرف مسبقًا في السيمبول تيبل
-        semanticLogger.checkVariableDefined(variableName, "class");
+
+// التحقق إذا المتغير مُعرف مسبقًا في السيمبول تيبل
+        semanticLogger.checkVariableDefined(variableName, "class", line);
 
         // 📝 لا تضف المتغير إذا لم يكن معرفًا مسبقًا
         if (symbolTable.contains(variableName, "class")) {
@@ -370,22 +373,23 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
     }
     @Override
     public ASTNode visitClickHandler(parseranalysis.ClickHandlerContext ctx) {
-        String handlerName = ctx.IDENTIFIER(0).getText();  // اسم المعالج
-        String callTarget = ctx.IDENTIFIER(1).getText();   // الدالة المستهدفة
+        String handlerName = ctx.IDENTIFIER(0).getText();
+        String callTarget = ctx.IDENTIFIER(1).getText();
+        int line = ctx.start.getLine();  // رقم السطر
 
         String argument = null;
         int passedArgs = 0;
 
         if (ctx.IDENTIFIER().size() > 2) {
-            argument = ctx.IDENTIFIER(2).getText();        // الوسيط
+            argument = ctx.IDENTIFIER(2).getText();
             passedArgs = 1;
         }
 
-        // ✅ عدد الوسائط المتوقع
+// عدد الوسائط المتوقع
         int expectedArgs = 1;
 
-        // تحقق من عدد الوسائط
-        semanticLogger.checkArgumentCount(callTarget, expectedArgs, passedArgs);
+// تمرير رقم السطر
+        semanticLogger.checkArgumentCount(callTarget, expectedArgs, passedArgs, line);
 
         ClickHandler clickHandler = new ClickHandler(handlerName, callTarget, argument);
 
