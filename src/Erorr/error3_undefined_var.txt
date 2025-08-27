@@ -1,6 +1,40 @@
 @Component({
-  selector: "oops"
+  selector: "my-app",
+  template: "<div><p>product</p><img src=pathphoto style={width:kkk}><h1>fff</h1></div>",
+  styleUrls: ["app.component.css"]
 })
-class UndefinedUse {
-  myMethod() {
-    name = "Angular";}}
+class AppComponent {
+  var logo: string;
+
+  constructor(service: MyService) {
+  }
+
+  myMethod(param1: number) {
+    console.log(logo);
+  }
+}
+
+page ProductPage {
+  form ProductEntity
+  list ProductStore
+  detail ProductStore by id
+
+  param productId: number
+
+  onSubmit dispatch saveProduct($form) then go SuccessPage(productId)
+
+  go HomePage()
+  addButton go AddProductPage()
+
+  item {
+    img: productImage,
+    title: productTitle,
+    subtitle: productSubtitle,
+    onClick go DetailPage(productId)
+  }
+
+  actions {
+    edit go EditPage(productId)
+    delete dispatch deleteProduct(productId)
+  }
+}

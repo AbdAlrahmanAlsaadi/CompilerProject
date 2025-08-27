@@ -1,2 +1,45 @@
-[ERROR] Line 5: Unknown data type 'float' for variable 'danger'.
-[ERROR] Line 5: Unknown data type 'float' for variable 'danger'.
+[ERROR] Line 9: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 12: ❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.
+[ERROR] Line 9: Duplicate method 'myMethod' in class scope.
+[ERROR] Line 6: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 7: Duplicate variable 'title' found in scope 'class'.
+[ERROR] Line 6: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 6: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 7: Duplicate variable 'title' found in scope 'class'.
+[ERROR] Line 6: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 6: Duplicate method 'myMethod' in class scope.
+[ERROR] Line 11: ❌ خطأ أثناء تحليل جسم الدالة 'anotherMethod'.
+[ERROR] Line 6: Duplicate method 'anotherMethod' in class scope.
+[ERROR] Line 9: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 12: ❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.
+[ERROR] Line 9: Duplicate method 'myMethod' in class scope.
+[ERROR] Line 7: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 10: ❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.
+[ERROR] Line 7: Duplicate method 'myMethod' in class scope.
+[ERROR] Line 7: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 10: ❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.
+[ERROR] Line 7: Duplicate method 'myMethod' in class scope.
+[ERROR] Line 7: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 10: ❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.
+[ERROR] Line 7: Duplicate method 'myMethod' in class scope.
+[ERROR] Line 9: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 12: ❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.
+[ERROR] Line 9: Duplicate method 'myMethod' in class scope.
+[ERROR] Line 7: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 10: ❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.
+[ERROR] Line 7: Duplicate method 'myMethod' in class scope.
+[ERROR] Line 6: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 7: Duplicate variable 'title' found in scope 'class'.
+[ERROR] Line 6: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 6: Duplicate method 'myMethod' in class scope.
+[ERROR] Line 11: ❌ خطأ أثناء تحليل جسم الدالة 'anotherMethod'.
+[ERROR] Line 6: Duplicate method 'anotherMethod' in class scope.
+[ERROR] Line 6: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 7: Duplicate variable 'title' found in scope 'class'.
+[ERROR] Line 6: Duplicate variable 'title' in scope 'class'.
+[ERROR] Line 6: Duplicate method 'myMethod' in class scope.
+[ERROR] Line 14: ❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.
+[ERROR] Line 6: Duplicate method 'anotherMethod' in class scope.
+[ERROR] Line 7: Duplicate variable 'logo' in scope 'class'.
+[ERROR] Line 10: ❌ خطأ أثناء تحليل جسم الدالة: لا يوجد محتوى.
+[ERROR] Line 7: Duplicate method 'myMethod' in class scope.

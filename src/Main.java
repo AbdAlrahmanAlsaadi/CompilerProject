@@ -1,11 +1,8 @@
 import SymbolTableStructure.SymbolTable2;
 import Visitor.SemanticVisitor;
-import antlr.lexicalanalysis;
-import antlr.parseranalysis;
-
+import CodeGeneration.CodeGenerator;
 
 import expression.ASTNode;
-
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
@@ -14,20 +11,27 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) {
         try {
-            CharStream input = CharStreams.fromFileName("C:\\Users\\dell\\Desktop\\AngularCompilerProject\\src\\Erorr\\error2_invalid_type.txt");
+            CharStream input = CharStreams.fromFileName("C:\\Users\\DELL\\IdeaProjects\\CompilerProject\\src\\test.dsl");
 
-            lexicalanalysis lexer = new lexicalanalysis(input);
+            // 🏗️ Lexer + Parser
+            antlr.lexicalanalysis lexer = new antlr.lexicalanalysis(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
-            parseranalysis parser = new parseranalysis(tokens);
+            antlr.parseranalysis parser = new antlr.parseranalysis(tokens);
 
-            // ✅ استدعاء القاعدة العليا componentFile
+            // ✅ القاعدة العليا
             ParseTree tree = parser.componentFile();
+
             SymbolTable2 table = new SymbolTable2();
-            SemanticVisitor visitor = new SemanticVisitor(table);
+            CodeGenerator codeGen = new CodeGenerator();
+            SemanticVisitor visitor = new SemanticVisitor(table, codeGen);
 
             ASTNode ast = visitor.visit(tree);
-
             ast.print("");
+
+            // ✨ توليد الملفات (HTML + CSS + JS)
+            codeGen.generateApp();
+
+            System.out.println("✅ Code generation completed. Open output.html in your browser.");
 
         } catch (IOException e) {
             System.err.println("❌ خطأ في قراءة الملف: " + e.getMessage());
@@ -36,4 +40,3 @@ public class Main {
         }
     }
 }
-
