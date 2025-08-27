@@ -30,10 +30,9 @@ public class Main {
             ast.print("");
 
         } catch (IOException e) {
-            System.err.println("❌ خطأ في قراءة الملف: " + e.getMessage());
+            System.err.println(" خطأ في قراءة الملف: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("❌ خطأ أثناء التحليل أو بناء الشجرة: " + e.getMessage());
+            System.err.println(" خطأ أثناء التحليل أو بناء الشجرة: " + e.getMessage());
         }
     }
 }
-

@@ -1,6 +1,6 @@
 package expression;
 
-public class IdentifierLiteral {
+public class IdentifierLiteral implements ExpressionNode {
     private String name;
 
     public IdentifierLiteral(String name) {
@@ -15,7 +15,13 @@ public class IdentifierLiteral {
         this.name = name;
     }
 
+    @Override
     public void print(String indent) {
         System.out.println(indent + "Identifier: " + name);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

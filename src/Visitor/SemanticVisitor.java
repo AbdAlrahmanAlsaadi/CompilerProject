@@ -22,7 +22,7 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         this.semanticLogger = new SemanticErrorLogger(symbolTable);
     }
 
-
+/*
     @Override
     public ASTNode visitComponentFile(parseranalysis.ComponentFileContext ctx) {
         List<Imports> importsList = new ArrayList<>();
@@ -57,6 +57,8 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
 
         return componentFile;
     }
+
+ */
     @Override
     public ASTNode visitImports(parseranalysis.ImportsContext ctx) {
         String importedIdentifier = null;

@@ -1,6 +1,4 @@
-// Generated from C:/Users/DELL/Desktop/AngularCompilerProject/src/parseranalysis.g4 by ANTLR 4.13.2
 package antlr;
-
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
