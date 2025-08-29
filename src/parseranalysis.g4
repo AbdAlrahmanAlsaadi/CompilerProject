@@ -107,13 +107,11 @@ objectLiteral
     CLOSE_BRACE
   ;
 
-/* ==================== القواعد الجديدة ==================== */
 
 entityDecl
   : ENTITY entityName=IDENTIFIER OPEN_BRACE fields+=fieldDecl+ CLOSE_BRACE
   ;
 
-// ✅ fieldDecl يدعم كل الأنواع
 fieldDecl
   : fieldName=IDENTIFIER COLON (fieldType=IDENTIFIER | NUMBER_T | STRING_T | URL_T)
   ;
@@ -134,7 +132,6 @@ paramList
   : ps+=param (COMMA ps+=param)*
   ;
 
-// ✅ param يدعم كل الأنواع
 param
   : paramName=IDENTIFIER COLON (paramType=IDENTIFIER | NUMBER_T | STRING_T | URL_T)
   ;
@@ -171,12 +168,11 @@ detailSection
   : DETAIL storeRef=IDENTIFIER BY byParam=IDENTIFIER
   ;
 
-// ✅ paramSection يدعم كل الأنواع
 paramSection
   : PARAM pName=IDENTIFIER COLON (pType=IDENTIFIER | NUMBER_T | STRING_T | URL_T)
   ;
 
-/* $form */
+
 formArg
   : DOLLAR FORM
   ;
@@ -214,7 +210,7 @@ actionBtn
   | DELETE DISPATCH deleteAction=IDENTIFIER OPEN_PAREN delArgs=argList? CLOSE_PAREN
   ;
 
-/* ===================== expressions ====================== */
+
 
 argList
   : es+=expr (COMMA es+=expr)*

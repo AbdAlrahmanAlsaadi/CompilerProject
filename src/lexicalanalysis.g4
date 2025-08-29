@@ -8,7 +8,6 @@ VAR: 'let' | 'var';
 EXPORT:'export';
 EXPORT_DEFAULT:'export default';
 STYLE_TAG:'style';
-// IMAGE_TAG:'img';  // شلناها لأنها بتتعارض مع IMG
 IMAGE_SRC:'src';
 IMPORT :'import';
 FROM:'from';

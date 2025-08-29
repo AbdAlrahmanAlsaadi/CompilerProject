@@ -1,39 +1,9 @@
-import { Component } from '@angular/core';
-
 @Component({
-  selector: 'app-root',
-  standalone: true
-  })
-
-export class AppComponent {
-  products[] = [
-    {
-      name: 'منتج 1',
-      image: 'assets/product1.jpg',
-      details: 'تفاصيل المنتج 1'
-    },
-    {
-      name: 'منتج 2',
-      image: 'assets/product2.jpg',
-      details: 'تفاصيل المنتج 2'
-    },
-    {
-      name: 'منتج 3',
-      image: 'assets/product3.jpg',
-      details: 'تفاصيل المنتج 3'
-    }
-  ];
-
-  var x = (){};
-
-
-
-  selectedProduct: any = null;
-
-  selectProduct(product: any) {
-
-    this.selectedProduct = product;
+  selector: "invalid-type"
+})
+class InvalidExample {
+  var count: numbre;
+  show() {
+    console.log(count);
   }
 }
-
-//export class AppComponent {}

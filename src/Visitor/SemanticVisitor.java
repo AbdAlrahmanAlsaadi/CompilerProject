@@ -19,25 +19,21 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
     private final SemanticErrorLogger semanticLogger;
     private CodeGenerator codeGen;
 
-    // سياقات مساعدة
     private String currentPage = null;
     private String currentEntity = null;
 
-    // 🔹 الكونستركتور القديم (يشتغل بدون تمرير CodeGenerator)
     public SemanticVisitor(SymbolTable2 symbolTable) {
         this.symbolTable = symbolTable;
         this.semanticLogger = new SemanticErrorLogger(symbolTable);
-        this.codeGen = new CodeGenerator(); // إنشاؤه افتراضياً
+        this.codeGen = new CodeGenerator();
     }
 
-    // 🔹 الكونستركتور الجديد (يمرر CodeGenerator من Main)
     public SemanticVisitor(SymbolTable2 symbolTable, CodeGenerator codeGen) {
         this.symbolTable = symbolTable;
         this.semanticLogger = new SemanticErrorLogger(symbolTable);
         this.codeGen = codeGen;
     }
 
-    // باقي الــ visitor methods ...
 
 
 @Override
@@ -47,60 +43,43 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         List<StoreDecl> stores = new ArrayList<>();
         List<RouteDecl> routes = new ArrayList<>();
         List<PageDecl> pages = new ArrayList<>();
-
-        // ===== Imports =====
         for (parseranalysis.ImportsContext impCtx : ctx.imports()) {
             Imports imp = (Imports) visit(impCtx);
             if (imp != null) importsList.add(imp);
         }
-
-        // ===== Component =====
         ComponentDeclaration declaration = null;
         if (!ctx.componentDeclaration().isEmpty()) {
             declaration = (ComponentDeclaration) visit(ctx.componentDeclaration(0));
         }
-
-        // ===== Entities =====
         for (parseranalysis.EntityDeclContext ectx : ctx.entityDecl()) {
             EntityDecl e = (EntityDecl) visit(ectx);
             if (e != null) entities.add(e);
         }
-
-        // ===== Stores =====
         for (parseranalysis.StoreDeclContext sctx : ctx.storeDecl()) {
             StoreDecl s = (StoreDecl) visit(sctx);
             if (s != null) stores.add(s);
         }
-
-        // ===== Routes =====
         for (parseranalysis.RouteDeclContext rctx : ctx.routeDecl()) {
             RouteDecl r = (RouteDecl) visit(rctx);
             if (r != null) routes.add(r);
         }
-
-        // ===== Pages =====
         for (parseranalysis.PageDeclContext pctx : ctx.pageDecl()) {
             PageDecl p = (PageDecl) visit(pctx);
             if (p != null) pages.add(p);
         }
 
-        // ================== مرحلة Code Generation ==================
         codeGen.writeHTML(codeGen.generateHead("MyApp"));
 
-        // JS (store + الصفحات + الراوتر)
         codeGen.writeJS(codeGen.generateStore());
         codeGen.writeJS(codeGen.generateAddProductPage());
         codeGen.writeJS(codeGen.generateListPage());
         codeGen.writeJS(codeGen.generateDetailPage());
         codeGen.writeJS(codeGen.generateRouter());
 
-        // Footer
         codeGen.writeHTML(codeGen.generateFooter());
 
-        // CSS
         codeGen.writeCSS(codeGen.generateCSS());
 
-        // ===== Build AST Node =====
         return new ComponentFile(importsList, declaration, entities, stores, routes, pages);
     }
 
@@ -127,6 +106,7 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         return new Imports(importedIdentifier, bindings, fromPath);
     }
 
+
     @Override
     public ASTNode visitComponentDeclaration(parseranalysis.ComponentDeclarationContext ctx) {
         String decorator = ctx.DECORATOR().getText();
@@ -137,21 +117,22 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
 
         symbolTable.addVariable(identifier, "component", "global", "@" + decorator);
 
-        // ربط مع الكود جنريشن
         if (metadata != null) {
             String selector = metadata.getPropertyValue("selector");
             String template = metadata.getPropertyValue("template");
             String style = metadata.getPropertyValue("styleUrls");
 
             if (selector != null && template != null) {
-                codeGen.writeHTML("<!-- Component: " + identifier + " -->");
-                codeGen.writeHTML("<div id=\"" + selector.replace("\"", "") + "\">");
-                codeGen.writeHTML("  " + template.replace("\"", ""));
-                codeGen.writeHTML("</div>");
+                codeGen.writeJS(
+                        "function render" + identifier + "() {\n" +
+                                "  const app = document.getElementById('app');\n" +
+                                "  app.innerHTML = `" + template.replace("\"", "") + "`;\n" +
+                                "}\n"
+                );
             }
+
             if (style != null) {
-                codeGen.writeCSS("/* Style for " + identifier + " */");
-                codeGen.writeCSS(style.replace("\"", ""));
+                codeGen.writeCSS("/* Style for " + identifier + " */\n" + style.replace("\"", ""));
             }
         }
 
@@ -168,7 +149,7 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
             if (!(keyNode instanceof TerminalNode)) break;
             String key = ((TerminalNode) keyNode).getText();
 
-            if (i < ctx.getChildCount()) i++; // skip ':'
+            if (i < ctx.getChildCount()) i++;
 
             ExpressionNode value = null;
             if (i < ctx.getChildCount()) {
@@ -208,20 +189,33 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
                         if (!symbolTable.contains(prop.getName(), scope)) {
                             symbolTable.addVariable(prop.getName(), prop.getType(), scope, "undefined");
 
-                            // ربط مع الكود جنريشن → نولّد متغير JS
-                            codeGen.writeJS("let " + prop.getName() + ";");
+                            // ✅ بدال let غير مهيأ, نولّد متغير واضح
+                            codeGen.writeJS(
+                                    "// Property: " + prop.getName() + "\n" +
+                                            "let " + prop.getName() + " = null;\n"
+                            );
                         } else {
-                            semanticLogger.logError("Duplicate variable '" + prop.getName() + "' in scope '" + scope + "'.", ctx.start.getLine());
+                            semanticLogger.logError(
+                                    "Duplicate variable '" + prop.getName() + "' in scope '" + scope + "'.",
+                                    ctx.start.getLine()
+                            );
                         }
                     } else if (node instanceof expression.Method) {
                         expression.Method method = (expression.Method) node;
                         if (!symbolTable.contains(method.getName(), scope)) {
                             symbolTable.addVariable(method.getName(), "function", scope, "methodBody");
 
-                            // توليد function
-                            codeGen.writeJS("function " + method.getName() + "() { /* ... */ }");
+                            codeGen.writeJS(
+                                    "// Method: " + method.getName() + "\n" +
+                                            "function " + method.getName() + "() {\n" +
+                                            "  // TODO: implement logic\n" +
+                                            "}\n"
+                            );
                         } else {
-                            semanticLogger.logError("Duplicate method '" + method.getName() + "' in class scope.", ctx.start.getLine());
+                            semanticLogger.logError(
+                                    "Duplicate method '" + method.getName() + "' in class scope.",
+                                    ctx.start.getLine()
+                            );
                         }
                     }
                 }
@@ -229,6 +223,7 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         }
         return new ClassBody(members);
     }
+
 
     @Override
     public ASTNode visitProperty(parseranalysis.PropertyContext ctx) {
@@ -252,7 +247,7 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
             semanticLogger.logSuccess("Variable '" + name + "' declared successfully in scope '" + scope + "'.", line);
 
             // 🔹 CodeGeneration لمتغير جديد
-            codeGen.writeJS("let " + name + ";");
+            codeGen.writeJS("// Property: " + name + "\nlet " + name + " = null;\n");
         }
         return new Property(varType, name, type);
     }
@@ -288,9 +283,15 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
 
         MethodBody body = null;
         try {
-            body = (MethodBody) visit(ctx.methodBody());
+            if (ctx.methodBody() != null) {
+                body = (MethodBody) visit(ctx.methodBody());
+            }
+            if (body == null) {
+                body = new MethodBody(new ArrayList<>()); // ✅ جسم فارغ بدل null
+            }
         } catch (Exception e) {
             semanticLogger.logError("❌ خطأ أثناء تحليل جسم الدالة '" + name + "'.", line);
+            body = new MethodBody(new ArrayList<>()); // ✅ fallback
         }
 
         symbolTable.addVariable(name, "method", "class", "void");
@@ -379,11 +380,11 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         symbolTable.addVariable(handlerName, "clickHandler", "component",
                 callTarget + (argument != null ? "(" + argument + ")" : "()"));
 
-        // 🔹 CodeGeneration: event binding
-        codeGen.writeJS(
-                "document.getElementById('" + handlerName + "').onclick = function() { "
-                        + callTarget + "(" + (argument != null ? argument : "") + "); };\n"
-        );
+        // ✅ JavaScript event binding
+        codeGen.writeJS("// Click handler for " + handlerName + "\n");
+        codeGen.writeJS("document.getElementById('" + handlerName + "').onclick = function() {\n");
+        codeGen.writeJS("    " + callTarget + "(" + (argument != null ? argument : "") + ");\n");
+        codeGen.writeJS("};\n");
 
         return clickHandler;
     }
@@ -394,8 +395,8 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         LogStatement log = new LogStatement(variable);
         symbolTable.addVariable("console_log_" + variable, "logStatement", "method", "console.log(" + variable + ")");
 
-        // 🔹 CodeGeneration
-        codeGen.writeJS("console.log(" + variable + ");");
+        // ✅ JavaScript console log
+        codeGen.writeJS("console.log(" + variable + ");\n");
 
         return log;
     }
@@ -408,8 +409,8 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         ArrayLiteral arrayLiteral = new ArrayLiteral(items);
         symbolTable.addVariable("arrayLiteral_" + System.currentTimeMillis(), "array", "method", items.toString());
 
-        // 🔹 CodeGeneration
-        codeGen.writeJS("[" + String.join(", ", items) + "]");
+        // ✅ JavaScript array literal
+        codeGen.writeJS("[" + String.join(", ", items) + "];\n");
 
         return arrayLiteral;
     }
@@ -432,14 +433,14 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         ObjectLiteral objectLiteral = new ObjectLiteral(properties);
         symbolTable.addVariable("object_" + System.currentTimeMillis(), "object", "local", "[object literal]");
 
-        // 🔹 CodeGen: object literal
+        // ✅ JavaScript object literal
         StringBuilder sb = new StringBuilder("{ ");
         for (ObjectProperty prop : properties) {
             sb.append(prop.getKey()).append(": ").append(prop.getValue().toString()).append(", ");
         }
         if (!properties.isEmpty()) sb.setLength(sb.length() - 2);
         sb.append(" }");
-        codeGen.writeJS(sb.toString() + ";");
+        codeGen.writeJS(sb.toString() + ";\n");
 
         return objectLiteral;
     }
@@ -451,30 +452,25 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
 
         String prevEntity = currentEntity;
         currentEntity = name;
-
         for (parseranalysis.FieldDeclContext fctx : ctx.fieldDecl()) {
             FieldDecl f = (FieldDecl) visit(fctx);
             if (f != null) fields.add(f);
         }
-
         if (!symbolTable.contains(name, "global")) {
             symbolTable.addVariable(name, "entity", "global", "entityDecl");
             semanticLogger.logSuccess("Entity '" + name + "' declared.", ctx.start.getLine());
         }
-
         currentEntity = prevEntity;
-
-        // 🔹 CodeGen: توليد class entity
-        codeGen.writeJS("class " + name + " {");
+        codeGen.writeJS("// Entity: " + name + "\n");
+        codeGen.writeJS("class " + name + " {\n");
         for (FieldDecl f : fields) {
-            codeGen.writeJS("  " + f.getName() + ";");
+            codeGen.writeJS("  " + f.getName() + ";\n");
         }
-        codeGen.writeJS("  constructor(init) { Object.assign(this, init); }");
-        codeGen.writeJS("}");
+        codeGen.writeJS("  constructor(init) {\n    Object.assign(this, init);\n  }\n");
+        codeGen.writeJS("}\n");
 
         return new EntityDecl(name, fields);
     }
-
     @Override
     public ASTNode visitFieldDecl(parseranalysis.FieldDeclContext ctx) {
         String fieldName = ctx.fieldName.getText();
@@ -504,12 +500,12 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
             semanticLogger.logSuccess("Store '" + name + "' declared.", ctx.start.getLine());
         }
 
-        // 🔹 CodeGen: React useState store
-        codeGen.writeJS(
-                "const [" + name + ", set" + Character.toUpperCase(name.charAt(0)) + name.substring(1) + "] = React.useState("
-                        + (isArray ? "[]" : "new " + entityName + "()")
-                        + ");"
-        );
+        // ✅ JavaScript (بدون React)
+        if (isArray) {
+            codeGen.writeJS("let " + name + " = [];\n");
+        } else {
+            codeGen.writeJS("let " + name + " = new " + entityName + "();\n");
+        }
 
         return new StoreDecl(name, entityName, isArray);
     }
@@ -527,7 +523,6 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
             }
         }
 
-        // 🔹 CodeGen: توليد actions كدوال
         for (ActionSig sig : list) {
             codeGen.writeJS("function " + sig.getName() + "() {\n  // TODO: implement action\n}\n\n");
         }
@@ -547,7 +542,6 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
             }
         }
 
-        // 🔹 CodeGen: مبدئياً نولّد function فارغ
         StringBuilder sb = new StringBuilder("function " + name + "(");
         for (int i = 0; i < params.size(); i++) {
             sb.append(params.get(i).getName());
@@ -590,11 +584,11 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         }
         symbolTable.addVariable(path, "route", "global", pageName);
 
-        // 🔹 CodeGen: React Router element
-        codeGen.writeJS("<Route path=\"" + path + "\" element={<" + pageName + " />} />");
+        codeGen.writeJS("// Route: " + path + " -> " + pageName + "\n");
 
         return new RouteDecl(path, pageName, params);
     }
+
 
     @Override
     public ASTNode visitPageDecl(parseranalysis.PageDeclContext ctx) {
@@ -612,16 +606,17 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         symbolTable.addVariable(name, "page", "page", "pageDecl");
         currentPage = prevPage;
 
-        // 🔹 CodeGen: React Component
-        codeGen.writeJS("function " + name + "() {\n  return (\n    <div>\n");
+        // ✅ HTML بسيط بدل React
+        codeGen.writeHTML("<!-- Page: " + name + " -->\n");
+        codeGen.writeHTML("<div id=\"" + name + "Page\">\n");
+
         for (ASTNode part : parts) {
             if (part instanceof FormSection) {
-                codeGen.writeJS("      {/* Form section */}\n");
-                codeGen.writeJS("      <form>\n        {/* inputs for " + ((FormSection) part).getEntityRef() + " */}\n      </form>\n");
+                codeGen.writeHTML("  <!-- Form for " + ((FormSection) part).getEntityRef() + " -->\n");
             }
-            // TODO: لاحقاً نضيف listSection, detailSection, navStmt ...
         }
-        codeGen.writeJS("    </div>\n  );\n}\n\n");
+
+        codeGen.writeHTML("</div>\n\n");
 
         return new PageDecl(name, parts);
     }
@@ -634,10 +629,9 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         }
         symbolTable.addVariable("form@" + entityRef, "form", "page:" + currentPage, entityRef);
 
-        // 🔹 CodeGen: basic form
-        codeGen.writeJS("<form>\n");
-        codeGen.writeJS("  {/* TODO: generate inputs for fields of " + entityRef + " */}\n");
-        codeGen.writeJS("</form>\n");
+        codeGen.writeHTML("<form id=\"" + currentPage + "Form\">\n");
+        codeGen.writeHTML("  <!-- TODO: generate inputs for " + entityRef + " -->\n");
+        codeGen.writeHTML("</form>\n");
 
         return new FormSection(entityRef);
     }
@@ -650,14 +644,14 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         }
         symbolTable.addVariable("list@" + storeRef, "list", "page:" + currentPage, storeRef);
 
-        // 🔹 CodeGen: basic list
-        codeGen.writeJS("{/* List Section for store " + storeRef + " */}\n");
-        codeGen.writeJS("<ul>\n");
-        codeGen.writeJS("  {/* TODO: map over " + storeRef + " */}\n");
-        codeGen.writeJS("</ul>\n");
+        codeGen.writeHTML("<!-- List Section for " + storeRef + " -->\n");
+        codeGen.writeHTML("<ul id=\"" + storeRef + "List\">\n");
+        codeGen.writeHTML("  <!-- TODO: loop items -->\n");
+        codeGen.writeHTML("</ul>\n");
 
         return new ListSection(storeRef);
     }
+
 
     @Override
     public ASTNode visitDetailSection(parseranalysis.DetailSectionContext ctx) {
@@ -673,9 +667,10 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
 
         symbolTable.addVariable("detail@" + storeRef, "detail", "page:" + currentPage, "by:" + byParam);
 
-        // 🔹 CodeGen
-        codeGen.writeJS("{/* Detail Section for " + storeRef + " by " + byParam + " */}\n");
-        codeGen.writeJS("<div>\n  {/* TODO: show details */}\n</div>\n");
+        codeGen.writeHTML("<!-- Detail Section for " + storeRef + " by " + byParam + " -->\n");
+        codeGen.writeHTML("<div id=\"" + storeRef + "Detail\">\n");
+        codeGen.writeHTML("  <!-- TODO: show details -->\n");
+        codeGen.writeHTML("</div>\n");
 
         return new DetailSection(storeRef, byParam);
     }
@@ -700,13 +695,11 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
             symbolTable.addVariable(name, type, pageScope, "param");
         }
 
-        // 🔹 CodeGen
-        codeGen.writeJS("{/* Param Section: " + name + " */}\n");
-        codeGen.writeJS("<span>{" + name + "}</span>\n");
+        codeGen.writeHTML("<!-- Param Section: " + name + " -->\n");
+        codeGen.writeHTML("<span id=\"" + name + "\"></span>\n");
 
         return new ParamSection(name, type);
     }
-
     @Override
     public ASTNode visitOnSubmitStmt(parseranalysis.OnSubmitStmtContext ctx) {
         String actionName = ctx.IDENTIFIER(0).getText();
@@ -727,14 +720,15 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         symbolTable.addVariable("onSubmit@" + actionName, "onSubmit", "page:" + currentPage,
                 (useForm ? "$form" : "") + (thenPage != null ? " -> " + thenPage : ""));
 
-        // 🔹 CodeGen
-        codeGen.writeJS("{/* OnSubmit for " + actionName + " */}\n");
-        codeGen.writeJS("<button onClick={() => {\n");
+        // ✅ HTML + JS
+        String btnId = "submit_" + actionName;
+        codeGen.writeHTML("<button id=\"" + btnId + "\">Submit</button>\n");
+        codeGen.writeJS("document.getElementById('" + btnId + "').onclick = function() {\n");
         codeGen.writeJS("  " + actionName + "(" + (useForm ? "formData" : "") + ");\n");
         if (thenPage != null) {
-            codeGen.writeJS("  navigate(\"/" + thenPage + "\");\n");
+            codeGen.writeJS("  window.location.href = '" + thenPage + ".html';\n");
         }
-        codeGen.writeJS("}}>Submit</button>\n");
+        codeGen.writeJS("};\n");
 
         return new OnSubmitStmt(actionName, useForm, thenPage);
     }
@@ -747,13 +741,12 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         }
         symbolTable.addVariable("go@" + target, "nav", "page:" + currentPage, target);
 
-        // 🔹 CodeGen
-        codeGen.writeJS("{/* Navigation */}\n");
-        codeGen.writeJS("<button onClick={() => navigate(\"/" + target + "\")}>Go to " + target + "</button>\n");
+        String btnId = "go_" + target;
+        codeGen.writeHTML("<button id=\"" + btnId + "\">Go to " + target + "</button>\n");
+        codeGen.writeJS("document.getElementById('" + btnId + "').onclick = function() { window.location.href = '" + target + ".html'; };\n");
 
         return new NavStmt(target);
     }
-
     @Override
     public ASTNode visitAddButtonStmt(parseranalysis.AddButtonStmtContext ctx) {
         String targetPage = ctx.targetPage.getText();
@@ -763,8 +756,9 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         }
         symbolTable.addVariable("addButton@" + targetPage, "addButton", "page:" + currentPage, targetPage);
 
-        // 🔹 CodeGen
-        codeGen.writeJS("<button onClick={() => navigate(\"/" + targetPage + "\")}>Add</button>\n");
+        String btnId = "addBtn_" + targetPage;
+        codeGen.writeHTML("<button id=\"" + btnId + "\">Add</button>\n");
+        codeGen.writeJS("document.getElementById('" + btnId + "').onclick = function() { window.location.href = '" + targetPage + ".html'; };\n");
 
         return new AddButtonStmt(targetPage);
     }
@@ -774,13 +768,10 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         String img = null, title = null, subtitle = null, onClickPage = null;
 
         for (parseranalysis.ItemBodyContext b : ctx.itemBody()) {
-            if (b.IMG() != null) {
-                img = b.getToken(parseranalysis.IDENTIFIER, 0).getText();
-            } else if (b.TITLE() != null) {
-                title = b.getToken(parseranalysis.IDENTIFIER, 0).getText();
-            } else if (b.SUBTITLE() != null) {
-                subtitle = b.getToken(parseranalysis.IDENTIFIER, 0).getText();
-            } else if (b.ONCLICK() != null) {
+            if (b.IMG() != null) img = b.getToken(parseranalysis.IDENTIFIER, 0).getText();
+            else if (b.TITLE() != null) title = b.getToken(parseranalysis.IDENTIFIER, 0).getText();
+            else if (b.SUBTITLE() != null) subtitle = b.getToken(parseranalysis.IDENTIFIER, 0).getText();
+            else if (b.ONCLICK() != null) {
                 onClickPage = b.getToken(parseranalysis.IDENTIFIER, 0).getText();
                 if (!symbolTable.contains(onClickPage, "page")) {
                     semanticLogger.logError("onClick target page '" + onClickPage + "' not defined.", b.start.getLine());
@@ -791,16 +782,20 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         symbolTable.addVariable("item", "item", "page:" + currentPage,
                 "img=" + img + ", title=" + title + ", subtitle=" + subtitle + ", onClick=" + onClickPage);
 
-        // 🔹 CodeGen
-        codeGen.writeJS("{/* Item Section */}\n");
-        codeGen.writeJS("<div className=\"item\" onClick={() => navigate(\"/" + onClickPage + "\") }>\n");
-        if (img != null) codeGen.writeJS("  <img src={" + img + "} alt=\"\" />\n");
-        if (title != null) codeGen.writeJS("  <h3>{" + title + "}</h3>\n");
-        if (subtitle != null) codeGen.writeJS("  <p>{" + subtitle + "}</p>\n");
-        codeGen.writeJS("</div>\n");
+        String itemId = "item_" + System.currentTimeMillis();
+        codeGen.writeHTML("<div class=\"item\" id=\"" + itemId + "\">\n");
+        if (img != null) codeGen.writeHTML("  <img src=\"" + img + "\" alt=\"\" />\n");
+        if (title != null) codeGen.writeHTML("  <h3>" + title + "</h3>\n");
+        if (subtitle != null) codeGen.writeHTML("  <p>" + subtitle + "</p>\n");
+        codeGen.writeHTML("</div>\n");
+
+        if (onClickPage != null) {
+            codeGen.writeJS("document.getElementById('" + itemId + "').onclick = function() { window.location.href = '" + onClickPage + ".html'; };\n");
+        }
 
         return new ItemSection(img, title, subtitle, onClickPage);
     }
+
 
     @Override
     public ASTNode visitActionButtonsSection(parseranalysis.ActionButtonsSectionContext ctx) {
@@ -824,15 +819,18 @@ public class SemanticVisitor extends parseranalysisBaseVisitor<ASTNode> {
         symbolTable.addVariable("actions", "buttons", "page:" + currentPage,
                 "edit=" + editPage + ", delete=" + deleteAction);
 
-        // 🔹 CodeGen
-        codeGen.writeJS("{/* Action Buttons */}\n");
         if (editPage != null) {
-            codeGen.writeJS("<button onClick={() => navigate(\"/" + editPage + "\")}>Edit</button>\n");
+            String btnId = "editBtn_" + editPage;
+            codeGen.writeHTML("<button id=\"" + btnId + "\">Edit</button>\n");
+            codeGen.writeJS("document.getElementById('" + btnId + "').onclick = function() { window.location.href = '" + editPage + ".html'; };\n");
         }
         if (deleteAction != null) {
-            codeGen.writeJS("<button onClick={() => " + deleteAction + "()}>Delete</button>\n");
+            String btnId = "deleteBtn_" + deleteAction;
+            codeGen.writeHTML("<button id=\"" + btnId + "\">Delete</button>\n");
+            codeGen.writeJS("document.getElementById('" + btnId + "').onclick = function() { " + deleteAction + "(); };\n");
         }
 
         return new ActionButtons(editPage, deleteAction);
     }
+
 }

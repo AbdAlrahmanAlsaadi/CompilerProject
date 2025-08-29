@@ -18,7 +18,7 @@ class AppComponent {
 
   handleClick() {
     logMessage("Hello World");
-    let htmlContent = <div>
+    var htmlContent = <div>
                         Welcome
                         <span>User</span>
                       </div>;

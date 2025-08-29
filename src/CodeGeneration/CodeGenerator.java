@@ -10,7 +10,7 @@ public class CodeGenerator {
     private FileWriter cssWriter;
     private FileWriter jsWriter;
 
-    private boolean initialized = false; // ✅ حتى ما نعيد توليد الملفات
+    private boolean initialized = false;
 
     public CodeGenerator() {
     }
@@ -29,7 +29,6 @@ public class CodeGenerator {
         }
     }
 
-    // ✅ Store (state management)
     public String generateStore() {
         return "let products = [];\n" +
                 "function addProduct(product) {\n" +
@@ -45,8 +44,6 @@ public class CodeGenerator {
                 "}\n";
     }
 
-    // ✅ Add Product Page
-    // ✅ Add Product Page مع رفع صورة
     public String generateAddProductPage() {
         return "function renderAddProduct() {\n" +
                 "  const app = document.getElementById('app');\n" +
@@ -61,7 +58,6 @@ public class CodeGenerator {
                 "    </form>`;\n" +
                 "}\n" +
 
-                // ✅ نقرأ الصورة Base64
                 "function handleAddProduct(e) {\n" +
                 "  e.preventDefault();\n" +
                 "  const fileInput = document.getElementById('pimg');\n" +
@@ -80,7 +76,6 @@ public class CodeGenerator {
                 "}\n";
     }
 
-    /// ✅ Product List Page منسقة مع أيقونات وكروت
     public String generateListPage() {
         return "function renderProductList() {\n" +
                 "  const app = document.getElementById('app');\n" +
@@ -108,7 +103,6 @@ public class CodeGenerator {
     }
 
 
-    // ✅ Product Detail Page مع أيقونات
     public String generateDetailPage() {
         return "function renderDetail(id) {\n" +
                 "  const product = getProduct(id);\n" +
@@ -128,7 +122,7 @@ public class CodeGenerator {
     // ✅ Router
     public String generateRouter() {
         return "function router() {\n" +
-                "  const path = window.location.pathname;\n" +
+                "  const path = window.location.hash.replace('#', '');\n" +
                 "  if (path === '/add') renderAddProduct();\n" +
                 "  else if (path === '/list') renderProductList();\n" +
                 "  else if (path.startsWith('/detail/')) {\n" +
@@ -138,15 +132,15 @@ public class CodeGenerator {
                 "    navigateTo('/list');\n" +
                 "  }\n" +
                 "}\n" +
+
                 "function navigateTo(route) {\n" +
-                "  history.pushState(null, null, route);\n" +
-                "  router();\n" +
+                "  window.location.hash = route;\n" +
                 "}\n" +
-                "window.addEventListener('popstate', router);\n" +
-                "window.addEventListener('load', router);\n";
+
+                "window.addEventListener('load', router);\n" +
+                "window.addEventListener('hashchange', router);\n";
     }
 
-    // ✅ Writers
     public void writeHTML(String code) {
         try {
             if (htmlWriter != null) {
@@ -180,7 +174,6 @@ public class CodeGenerator {
         }
     }
 
-    // ✅ HTML wrapper
     public String generateHead(String title) {
         return "<!DOCTYPE html>\n" +
                 "<html lang=\"en\">\n" +
@@ -200,9 +193,7 @@ public class CodeGenerator {
         return "</body>\n</html>";
     }
 
-    // ✅ Default CSS
-    // ✅ Default CSS (منسّق واحترافي)
-    // ✅ Default CSS (منسّق واحترافي)
+
     public String generateCSS() {
         return "body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: #f2f2f9; }\n" +
                 "h1 {\n" +
@@ -261,17 +252,12 @@ public class CodeGenerator {
                 "form button:hover { background: linear-gradient(45deg,#38ef7d,#11998e); }\n";
     }
 
-
     public void generateApp() {
-        if (initialized) return; // ⛔ مرة وحدة بس
-        initialized = true;
-
         try {
             htmlWriter = new FileWriter("output.html", false);
             cssWriter = new FileWriter("style.css", false);
             jsWriter = new FileWriter("output.js", false);
 
-            // ✨ نكتب الملفات
             htmlWriter.write(generateHead("Generated App"));
             htmlWriter.write(generateFooter());
             htmlWriter.close();
