@@ -1,0 +1,4 @@
+[ERROR] Line 5: Unknown data type 'numbre' for variable 'count'.
+[ERROR] Line 5: Duplicate variable 'count' in scope 'class'.
+[ERROR] Line 6: ❌ خطأ أثناء تحليل جسم الدالة 'show'.
+[ERROR] Line 5: Duplicate method 'show' in class scope.

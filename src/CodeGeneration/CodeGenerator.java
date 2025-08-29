@@ -119,7 +119,7 @@ public class CodeGenerator {
     }
 
 
-    // ✅ Router
+
     public String generateRouter() {
         return "function router() {\n" +
                 "  const path = window.location.hash.replace('#', '');\n" +
